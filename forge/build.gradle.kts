@@ -56,6 +56,7 @@ dependencies {
 
     "forge"("net.minecraftforge:forge:$forgeVersion")
     modImplementation("dev.architectury:architectury-forge:$architecturyApiVersion")
+    shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
     // run's classpath, but don't bundle it or require it at runtime - see

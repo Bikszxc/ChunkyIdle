@@ -37,6 +37,7 @@ val fabricLoaderVersion: String by project
 val architecturyApiVersion: String by project
 
 dependencies {
+    implementation("org.snakeyaml:snakeyaml-engine:2.10")
     minecraft("com.mojang:minecraft:$minecraft")
     mappings(loom.officialMojangMappings())
 
@@ -50,6 +51,9 @@ dependencies {
     // ...) - fabric/forge/neoforge each additionally pull in their own
     // dev.architectury:architectury-<loader> implementation of this.
     modImplementation("dev.architectury:architectury:$architecturyApiVersion")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
@@ -62,6 +66,19 @@ java {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+}
+
+tasks.processResources {
+    val metadata = mapOf(
+        "mod_version" to (project.findProperty("modVersion") as String),
+        "mod_authors" to (project.findProperty("modAuthors") as String),
+    )
+    inputs.properties(metadata)
+    filesMatching("chunkyidle-build.properties") { expand(metadata) }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
 
 tasks.build {

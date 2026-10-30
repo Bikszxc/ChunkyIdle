@@ -11,10 +11,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.example.examplemod.fabric.ExampleModFabric"
-    ],
-    "client": [
-      "com.example.examplemod.fabric.ExampleModFabricClient"
+      "dev.bikzxc.chunkyidle.fabric.ChunkyIdleFabric"
     ]
   },
   "depends": {
@@ -23,6 +20,6 @@
     "minecraft": "${minecraft_version}"
   },
   "suggests": {
-    "cloth-config": "*"
+    "chunky": "*"
   }
 }
