@@ -40,6 +40,7 @@ configurations {
 
 repositories {
     maven("https://maven.shedaniel.me/") // Cloth Config
+    maven("https://repo.codemc.io/repository/maven-public/") // Chunky's published API
 }
 
 loom {
@@ -55,16 +56,6 @@ loom {
 // loaders/versions by construction. `stonecutter.current.isActive` is true for exactly one
 // generated project at a time, so this follows `stonecutter active "..."` in
 // stonecutter.gradle.kts automatically if that ever changes.
-if (stonecutter.current.isActive) {
-    fabricApi {
-        configureTests {
-            createSourceSet = true
-            enableGameTests = true
-            eula = true
-        }
-    }
-}
-
 // javaVersion/fabricLoaderVersion/fabricApiVersion/architecturyApiVersion/
 // clothConfigVersion live in versions/<mcVersion>/gradle.properties, which -
 // unlike this repo's root gradle.properties - is only an ancestor directory
@@ -82,6 +73,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
     modImplementation("dev.architectury:architectury-fabric:$architecturyApiVersion")
+    modCompileOnly("org.popcraft:chunky-common:1.3.146")
+    shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
     // run's classpath, but don't bundle it or require it at runtime - see
@@ -167,12 +160,13 @@ publishMods {
         projectId.set(modrinthProjectId)
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
         minecraftVersions.add(minecraft)
+        environment.set(SERVER_ONLY)
     }
     curseforge {
         projectId.set(curseforgeProjectId)
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
         minecraftVersions.add(minecraft)
-        client.set(true)
+        client.set(false)
         server.set(true)
     }
 }

@@ -46,16 +46,6 @@ repositories {
 // against this file's `dev.architectury.loom-no-remap` variant specifically (only ever
 // exercised once a 26.1+ version is made active) - if it doesn't work here, that's the
 // first thing to check.
-if (stonecutter.current.isActive) {
-    fabricApi {
-        configureTests {
-            createSourceSet = true
-            enableGameTests = true
-            eula = true
-        }
-    }
-}
-
 // See the comment in fabric/build.gradle.kts: these live in
 // versions/26.2/gradle.properties, only an ancestor of `common`.
 val fabricLoaderVersion = common.property("fabricLoaderVersion") as String
@@ -70,6 +60,7 @@ dependencies {
     implementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
     implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
     implementation("dev.architectury:architectury-fabric:$architecturyApiVersion")
+    shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
     // run's classpath, but don't bundle it or require it at runtime - see

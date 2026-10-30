@@ -26,14 +26,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-rootProject.name = "examplemod"
-
-// A plain, standalone Gradle module - deliberately NOT part of the stonecutter {} block
-// below, so it's outside the version/loader matrix entirely. See datagen/build.gradle.kts
-// and README.md's "Data generation" section for why: it's a dev-time-only tool pinned to
-// one fixed Minecraft version, producing static JSON shared by every version/loader rather
-// than needing to compile against all of them.
-include("datagen")
+rootProject.name = "chunkyidle"
 
 stonecutter {
     centralScript = "build.gradle.kts"
@@ -66,6 +59,6 @@ stonecutter {
 
         branch("forge") { versions("1.20.1") }
 
-        vcsVersion = "1.21.1"
+        vcsVersion = "1.20.1"
     }
 }
