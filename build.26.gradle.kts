@@ -31,6 +31,7 @@ val architecturyApiVersion: String by project
 dependencies {
     // No `mappings(...)` here - see the comment above.
     minecraft("net.minecraft:minecraft:$minecraft")
+    implementation("org.snakeyaml:snakeyaml-engine:2.10")
 
     // We depend on Fabric Loader here only to use its @Environment /
     // @EnvironmentInterface annotations. Do NOT use any other Fabric
