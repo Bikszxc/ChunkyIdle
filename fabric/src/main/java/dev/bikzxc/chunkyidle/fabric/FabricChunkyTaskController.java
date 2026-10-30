@@ -1,8 +1,10 @@
 package dev.bikzxc.chunkyidle.fabric;
 
 import dev.bikzxc.chunkyidle.automation.ChunkyTaskController;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import org.popcraft.chunky.ChunkyProvider;
 
 import java.util.Set;
@@ -22,9 +24,17 @@ final class FabricChunkyTaskController implements ChunkyTaskController {
         var api = ChunkyProvider.get().getApi();
         return StreamSupport.stream(server.getAllLevels().spliterator(), false)
                 .map(ServerLevel::dimension)
-                .map(key -> key.location().toString())
+                .map(FabricChunkyTaskController::worldId)
                 .filter(api::isRunning)
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    static String worldId(ResourceKey<Level> key) {
+        //? <1.21.11 {
+        return key.location().toString();
+        //?} else {
+        /*return key.identifier().toString();*/
+        //?}
     }
 
     @Override

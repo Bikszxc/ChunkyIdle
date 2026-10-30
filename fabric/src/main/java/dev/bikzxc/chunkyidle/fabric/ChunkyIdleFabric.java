@@ -46,7 +46,13 @@ public class ChunkyIdleFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPING.register(ChunkyIdleFabric::stopping);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> { automation = null; settings = null; currentServer = null; checkForEmptyServer = false; });
         CommandRegistrationCallback.EVENT.register((dispatcher, registry, environment) -> dispatcher.register(
-                Commands.literal("chunkyidle").requires(source -> source.hasPermission(2))
+                Commands.literal("chunkyidle").requires(source ->
+                        //? <1.21.11 {
+                        source.hasPermission(2)
+                        //?} else {
+                        /*source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)*/
+                        //?}
+                )
                         .then(Commands.literal("reload").executes(ctx -> reload(ctx.getSource())))
                         .then(Commands.literal("status").executes(ctx -> status(ctx.getSource())))
                         .then(Commands.literal("toggle").executes(ctx -> toggle(ctx.getSource())))));
@@ -66,7 +72,7 @@ public class ChunkyIdleFabric implements ModInitializer {
             if (!reloaded && settings.enabled() && settings.restartEnabled()) {
                 Set<String> worlds = settings.resumeScope() == IdleAutomationConfig.ResumeScope.ANY_SAVED
                         ? StreamSupport.stream(server.getAllLevels().spliterator(), false)
-                            .map(level -> level.dimension().location().toString()).collect(Collectors.toSet())
+                            .map(level -> FabricChunkyTaskController.worldId(level.dimension())).collect(Collectors.toSet())
                         : RESUME_STATE.read();
                 long delay = switch (settings.resumeWait().kind()) {
                     case IMMEDIATELY -> 0;

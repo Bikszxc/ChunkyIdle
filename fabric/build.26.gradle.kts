@@ -38,6 +38,7 @@ configurations {
 
 repositories {
     maven("https://maven.shedaniel.me/") // Cloth Config
+    maven("https://repo.codemc.io/repository/maven-public/") // Chunky's published API
 }
 
 // See the longer comment in fabric/build.gradle.kts (and README.md's "Testing" section) -
@@ -60,6 +61,7 @@ dependencies {
     implementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
     implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
     implementation("dev.architectury:architectury-fabric:$architecturyApiVersion")
+    compileOnly("org.popcraft:chunky-common:1.3.146")
     shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
