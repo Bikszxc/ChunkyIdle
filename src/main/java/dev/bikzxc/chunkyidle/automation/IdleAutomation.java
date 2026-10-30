@@ -43,7 +43,11 @@ public final class IdleAutomation {
         refreshRunningWorldSnapshot();
         ticksUntilResume = -1;
         if (!enabled) return;
-        for (String world : Set.copyOf(lastObservedRunningWorlds)) if (chunky.pause(world)) pausedByUs.add(world);
+        for (String world : Set.copyOf(lastObservedRunningWorlds)) {
+            if (chunky.pause(world)) {
+                pausedByUs.add(world);
+            }
+        }
     }
 
     public void onServerBecameEmpty() {
@@ -69,26 +73,51 @@ public final class IdleAutomation {
 
     public void onServerTick(boolean hasPlayers) {
         refreshRunningWorldSnapshot();
-        if (hasPlayers) { ticksUntilResume = -1; return; }
+        if (hasPlayers) {
+            ticksUntilResume = -1;
+            return;
+        }
         if (!enabled || ticksUntilResume < 0) return;
         if (ticksUntilResume > 0) ticksUntilResume--;
-        if (ticksUntilResume == 0) {
-            completedResumeDelaySeconds = currentResumeDelaySeconds;
-            resumeCompletionCount++;
-            for (String world : Set.copyOf(pausedByUs)) chunky.resume(world);
-            pausedByUs.clear();
-            ticksUntilResume = -1;
-        }
+        if (ticksUntilResume == 0) resumePausedWorlds();
     }
 
-    public boolean isResumePending() { return ticksUntilResume >= 0; }
-    public long ticksUntilResume() { return ticksUntilResume; }
-    public long completedResumeDelaySeconds() { return completedResumeDelaySeconds; }
-    public long resumeCompletionCount() { return resumeCompletionCount; }
-    public boolean isEnabled() { return enabled; }
-    public Set<String> pausedWorlds() { return Set.copyOf(pausedByUs); }
+    public boolean isResumePending() {
+        return ticksUntilResume >= 0;
+    }
+
+    public long ticksUntilResume() {
+        return ticksUntilResume;
+    }
+
+    public long completedResumeDelaySeconds() {
+        return completedResumeDelaySeconds;
+    }
+
+    public long resumeCompletionCount() {
+        return resumeCompletionCount;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public Set<String> pausedWorlds() {
+        return Set.copyOf(pausedByUs);
+    }
+
     public void toggleEnabled(boolean value) {
         enabled = value;
+        ticksUntilResume = -1;
+    }
+
+    private void resumePausedWorlds() {
+        completedResumeDelaySeconds = currentResumeDelaySeconds;
+        resumeCompletionCount++;
+        for (String world : Set.copyOf(pausedByUs)) {
+            chunky.resume(world);
+        }
+        pausedByUs.clear();
         ticksUntilResume = -1;
     }
 

@@ -4,6 +4,7 @@ import dev.bikzxc.chunkyidle.ChunkyIdle;
 import dev.bikzxc.chunkyidle.ChunkyIdleLog;
 import dev.bikzxc.chunkyidle.automation.IdleAutomation;
 import dev.bikzxc.chunkyidle.automation.IdleAutomationConfig;
+import dev.bikzxc.chunkyidle.automation.IdleAutomationConfigFile;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -15,8 +16,6 @@ import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,7 +25,7 @@ public class ChunkyIdleFabric implements ModInitializer {
     private static final Path DIRECTORY = FabricLoader.getInstance().getConfigDir().resolve("chunkyidle");
     private static final Path CONFIG = DIRECTORY.resolve("config.yml");
     private static final Path LEGACY = FabricLoader.getInstance().getConfigDir().resolve("chunkyidle.properties");
-    private static final Path RESUME_STATE = DIRECTORY.resolve("resume-state.txt");
+    private static final FabricResumeStateStore RESUME_STATE = new FabricResumeStateStore(DIRECTORY.resolve("resume-state.txt"));
     @Nullable private static IdleAutomation automation;
     @Nullable private static IdleAutomationConfig settings;
     @Nullable private static MinecraftServer currentServer;
@@ -57,7 +56,7 @@ public class ChunkyIdleFabric implements ModInitializer {
         currentServer = server;
         checkForEmptyServer = false;
         try {
-            settings = IdleAutomationConfig.load(CONFIG, LEGACY);
+            settings = IdleAutomationConfigFile.load(CONFIG, LEGACY);
             if (!FabricLoader.getInstance().isModLoaded("chunky")) {
                 automation = null;
                 ChunkyIdleLog.info("Chunky was not found, so automatic generation is off.");
@@ -68,7 +67,7 @@ public class ChunkyIdleFabric implements ModInitializer {
                 Set<String> worlds = settings.resumeScope() == IdleAutomationConfig.ResumeScope.ANY_SAVED
                         ? StreamSupport.stream(server.getAllLevels().spliterator(), false)
                             .map(level -> level.dimension().location().toString()).collect(Collectors.toSet())
-                        : readResumeState();
+                        : RESUME_STATE.read();
                 long delay = switch (settings.resumeWait().kind()) {
                     case IMMEDIATELY -> 0;
                     case IDLE_TIME -> settings.idleSeconds();
@@ -79,7 +78,7 @@ public class ChunkyIdleFabric implements ModInitializer {
                     if (delay == 0) ChunkyIdleLog.info("The server is ready. Saved Chunky generation will resume now.");
                     else ChunkyIdleLog.info("Saved Chunky generation will resume after the server has been empty for {}.", ChunkyIdleMessages.formatDuration(delay));
                 }
-                else Files.deleteIfExists(RESUME_STATE);
+                else RESUME_STATE.clear();
             }
             if (reloaded) ChunkyIdleLog.info("Settings reloaded.");
             else ChunkyIdleLog.info("Settings loaded. ChunkyIdle will manage generation when the server is empty.");
@@ -89,25 +88,19 @@ public class ChunkyIdleFabric implements ModInitializer {
         }
     }
 
-    private static Set<String> readResumeState() throws IOException {
-        if (Files.notExists(RESUME_STATE)) return Set.of();
-        return Files.readAllLines(RESUME_STATE, StandardCharsets.UTF_8).stream().filter(line -> !line.isBlank()).collect(Collectors.toSet());
-    }
-
     private static void stopping(MinecraftServer server) {
         if (automation == null || settings == null || !settings.enabled() || !settings.restartEnabled()) {
-            try { Files.deleteIfExists(RESUME_STATE); } catch (IOException e) { ChunkyIdleLog.warn("Could not clear saved restart tasks.", e); }
+            try { RESUME_STATE.clear(); } catch (IOException e) { ChunkyIdleLog.warn("Could not clear saved restart tasks.", e); }
             return;
         }
         try {
-            Files.createDirectories(DIRECTORY);
-            Files.write(RESUME_STATE, automation.worldsToSave().stream().sorted().toList(), StandardCharsets.UTF_8);
+            RESUME_STATE.write(automation.worldsToSave());
         } catch (IOException e) { ChunkyIdleLog.warn("Saved tasks may not be available after restart.", e); }
     }
 
     private static int reload(net.minecraft.commands.CommandSourceStack source) {
         try {
-            IdleAutomationConfig fresh = IdleAutomationConfig.load(CONFIG, LEGACY);
+            IdleAutomationConfig fresh = IdleAutomationConfigFile.load(CONFIG, LEGACY);
             if (currentServer != null && FabricLoader.getInstance().isModLoaded("chunky")) {
                 if (automation == null) automation = new IdleAutomation(new FabricChunkyTaskController(currentServer), fresh);
                 else automation.applyConfig(fresh);
@@ -131,7 +124,7 @@ public class ChunkyIdleFabric implements ModInitializer {
         if (settings == null || automation == null) return fail(source, "ChunkyIdle is not ready.", "Check that Chunky is installed and the config has loaded.");
         boolean enabled = !settings.enabled();
         try {
-            IdleAutomationConfig.setEnabledPreservingComments(CONFIG, enabled);
+            IdleAutomationConfigFile.setEnabledPreservingComments(CONFIG, enabled);
             settings = settings.withEnabled(enabled);
             automation.toggleEnabled(enabled);
             if (enabled && currentServer != null && !currentServer.getPlayerList().getPlayers().isEmpty()) automation.onPlayerJoined();
@@ -176,7 +169,7 @@ public class ChunkyIdleFabric implements ModInitializer {
             long waited = automation.completedResumeDelaySeconds();
             if (waited > 0) ChunkyIdleLog.info("Server has been empty for {}. Resuming Chunky.", ChunkyIdleMessages.formatDuration(waited));
             else ChunkyIdleLog.info("The server is empty. Resuming saved Chunky generation.");
-            try { Files.deleteIfExists(RESUME_STATE); } catch (IOException e) { ChunkyIdleLog.warn("Could not clear completed restart tasks.", e); }
+            try { RESUME_STATE.clear(); } catch (IOException e) { ChunkyIdleLog.warn("Could not clear completed restart tasks.", e); }
         }
     }
 }

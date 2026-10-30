@@ -21,7 +21,7 @@ class IdleAutomationConfigTest {
     }
 
     @Test void generatedDefaultsAreFriendlyAndUseTenSeconds() throws Exception {
-        var config = IdleAutomationConfig.load(temp.resolve("chunkyidle/config.yml"), temp.resolve("chunkyidle.properties"));
+        var config = IdleAutomationConfigFile.load(temp.resolve("chunkyidle/config.yml"), temp.resolve("chunkyidle.properties"));
         assertTrue(config.enabled());
         assertEquals(10, config.idleSeconds());
         assertTrue(config.restartEnabled());
@@ -38,7 +38,7 @@ class IdleAutomationConfigTest {
         Path legacy = temp.resolve("chunkyidle.properties");
         Files.writeString(legacy, "idle-seconds=42\n");
         Path configPath = temp.resolve("chunkyidle/config.yml");
-        assertEquals(42, IdleAutomationConfig.load(configPath, legacy).idleSeconds());
+        assertEquals(42, IdleAutomationConfigFile.load(configPath, legacy).idleSeconds());
         assertTrue(Files.exists(legacy));
     }
 
@@ -56,7 +56,7 @@ class IdleAutomationConfigTest {
     @Test void togglePreservesYamlCommentsAndOtherSettings() throws Exception {
         Path path = temp.resolve("config.yml");
         Files.writeString(path, IdleAutomationConfig.defaultYaml());
-        IdleAutomationConfig.setEnabledPreservingComments(path, false);
+        IdleAutomationConfigFile.setEnabledPreservingComments(path, false);
         String changed = Files.readString(path);
         assertTrue(changed.contains("# Enable automatic pause and resume based on player activity."));
         assertTrue(changed.contains("enabled: false"));
@@ -70,7 +70,7 @@ class IdleAutomationConfigTest {
         String existing = IdleAutomationConfig.defaultYaml().replace("wait-after-empty: 10s", "wait-after-empty: 5m")
                 .replace("# Enable automatic pause and resume", "# My server's custom comment\n  # Enable automatic pause and resume");
         Files.writeString(path, existing);
-        var loaded = IdleAutomationConfig.load(path, temp.resolve("chunkyidle.properties"));
+        var loaded = IdleAutomationConfigFile.load(path, temp.resolve("chunkyidle.properties"));
         assertEquals(300, loaded.idleSeconds());
         assertEquals(existing, Files.readString(path));
     }

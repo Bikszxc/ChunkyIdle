@@ -49,39 +49,28 @@ final class ChunkyIdleMessages {
                         .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
                 .append(Component.literal("\n\n  AUTOMATION").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 
-        String automationState = settings == null ? "Unavailable"
-                : !chunkyLoaded ? "Chunky Not Found" : settings.enabled() ? "● Enabled" : "● Disabled";
-        ChatFormatting automationColor = settings == null || !chunkyLoaded ? ChatFormatting.RED
-                : settings.enabled() ? ChatFormatting.GREEN : ChatFormatting.RED;
+        String automationState = automationState(settings, chunkyLoaded, true);
+        ChatFormatting automationColor = settings == null || !chunkyLoaded || !settings.enabled()
+                ? ChatFormatting.RED : ChatFormatting.GREEN;
         output = row(output, "Status", automationState, "Whether player activity currently controls Chunky generation.", automationColor);
         output = row(output, "Empty Server Wait", settings == null ? "Unavailable" : formatDuration(settings.idleSeconds()),
                 "How long the server must remain empty before generation resumes.", ChatFormatting.WHITE);
         output = row(output, "Paused Tasks", automation == null ? "Unavailable" : Integer.toString(automation.pausedWorlds().size()),
                 "Number of generation tasks ChunkyIdle is currently tracking for resume.", ChatFormatting.WHITE);
-        String timer = automation == null || !automation.isResumePending() ? "Not running"
-                : formatDuration((automation.ticksUntilResume() + 19) / 20) + " remaining";
+        String timer = resumeTimer(automation);
         output = row(output, "Resume Timer", timer,
                 "Time remaining before ChunkyIdle attempts to continue eligible saved generation.", ChatFormatting.WHITE);
 
         output = output.append(Component.literal("\n\n  SERVER RESTART").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-        String restartState = settings == null ? "Unavailable"
-                : settings.restartEnabled() && settings.enabled() ? "● Enabled"
-                : settings.restartEnabled() ? "● Disabled (automation off)" : "● Disabled";
+        String restartState = restartState(settings, true);
         ChatFormatting restartColor = settings == null || !settings.restartEnabled() || !settings.enabled()
                 ? ChatFormatting.RED : ChatFormatting.GREEN;
         output = row(output, "Status", restartState,
                 "Whether saved generation tasks may resume after a restart. Restart recovery also requires automation to be enabled.", restartColor);
-        String policy = settings == null ? "Unavailable" : switch (settings.resumeScope()) {
-            case ACTIVE_BEFORE_SHUTDOWN -> "Active Before Shutdown";
-            case ANY_SAVED -> "Any Saved Tasks";
-        };
+        String policy = resumePolicy(settings, true);
         String policyHelp = "Determines which saved generation tasks are eligible for automatic resumption. Any Saved Tasks may resume tasks an administrator paused manually.";
         output = row(output, "Resume Policy", policy, policyHelp, ChatFormatting.WHITE);
-        String delay = settings == null ? "Unavailable" : switch (settings.resumeWait().kind()) {
-            case IDLE_TIME -> "Idle Time (" + formatDuration(settings.idleSeconds()) + ")";
-            case IMMEDIATELY -> "Immediately";
-            case DURATION -> formatDuration(settings.resumeWait().seconds());
-        };
+        String delay = resumeDelay(settings, true);
         output = row(output, "Resume Delay", delay,
                 "Determines when eligible tasks resume after server startup.", ChatFormatting.WHITE);
         output = output.append(Component.literal("\n\n" + SEPARATOR).withStyle(ChatFormatting.DARK_GRAY));
@@ -111,30 +100,14 @@ final class ChunkyIdleMessages {
     private static void sendConsoleStatus(IdleAutomationConfig settings, IdleAutomation automation,
                                          boolean chunkyLoaded, MinecraftServer server) {
         ChunkyIdleLog.info("Status | v{}", ChunkyIdle.VERSION);
-        String automationState = settings == null ? "Unavailable"
-                : !chunkyLoaded ? "Chunky not found" : settings.enabled() ? "Enabled" : "Disabled";
-        ChunkyIdleLog.info("Automation: " + automationState);
+        ChunkyIdleLog.info("Automation: " + automationState(settings, chunkyLoaded, false));
         ChunkyIdleLog.info("  Empty server wait: " + (settings == null ? "Unavailable" : formatDuration(settings.idleSeconds())));
         ChunkyIdleLog.info("  Paused tasks: " + (automation == null ? "Unavailable" : automation.pausedWorlds().size()));
-        String timer = automation == null || !automation.isResumePending() ? "Not running"
-                : formatDuration((automation.ticksUntilResume() + 19) / 20) + " remaining";
-        ChunkyIdleLog.info("  Resume timer: " + timer);
+        ChunkyIdleLog.info("  Resume timer: " + resumeTimer(automation));
 
-        String restartState = settings == null ? "Unavailable"
-                : settings.restartEnabled() && settings.enabled() ? "Enabled"
-                : settings.restartEnabled() ? "Disabled (automation is off)" : "Disabled";
-        ChunkyIdleLog.info("Server restart: " + restartState);
-        String policy = settings == null ? "Unavailable" : switch (settings.resumeScope()) {
-            case ACTIVE_BEFORE_SHUTDOWN -> "Active before shutdown";
-            case ANY_SAVED -> "Any saved tasks (may resume tasks paused manually)";
-        };
-        ChunkyIdleLog.info("  Resume policy: " + policy);
-        String delay = settings == null ? "Unavailable" : switch (settings.resumeWait().kind()) {
-            case IDLE_TIME -> "Idle time (" + formatDuration(settings.idleSeconds()) + ")";
-            case IMMEDIATELY -> "Immediately";
-            case DURATION -> formatDuration(settings.resumeWait().seconds());
-        };
-        ChunkyIdleLog.info("  Resume delay: " + delay);
+        ChunkyIdleLog.info("Server restart: " + restartState(settings, false));
+        ChunkyIdleLog.info("  Resume policy: " + resumePolicy(settings, false));
+        ChunkyIdleLog.info("  Resume delay: " + resumeDelay(settings, false));
 
         if (settings == null) ChunkyIdleLog.info("Fix config.yml, then run /chunkyidle reload.");
         else if (!chunkyLoaded) ChunkyIdleLog.info("Install Chunky to enable generation automation.");
@@ -147,6 +120,42 @@ final class ChunkyIdleMessages {
         if (seconds >= 3600 && seconds % 3600 == 0) return unit(seconds / 3600, "hour");
         if (seconds >= 60 && seconds % 60 == 0) return unit(seconds / 60, "minute");
         return unit(seconds, "second");
+    }
+
+    private static String automationState(IdleAutomationConfig settings, boolean chunkyLoaded, boolean styled) {
+        if (settings == null) return "Unavailable";
+        if (!chunkyLoaded) return styled ? "Chunky Not Found" : "Chunky not found";
+        if (settings.enabled()) return styled ? "● Enabled" : "Enabled";
+        return styled ? "● Disabled" : "Disabled";
+    }
+
+    private static String restartState(IdleAutomationConfig settings, boolean styled) {
+        if (settings == null) return "Unavailable";
+        if (!settings.restartEnabled()) return styled ? "● Disabled" : "Disabled";
+        if (settings.enabled()) return styled ? "● Enabled" : "Enabled";
+        return styled ? "● Disabled (automation off)" : "Disabled (automation is off)";
+    }
+
+    private static String resumePolicy(IdleAutomationConfig settings, boolean styled) {
+        if (settings == null) return "Unavailable";
+        return switch (settings.resumeScope()) {
+            case ACTIVE_BEFORE_SHUTDOWN -> styled ? "Active Before Shutdown" : "Active before shutdown";
+            case ANY_SAVED -> styled ? "Any Saved Tasks" : "Any saved tasks (may resume tasks paused manually)";
+        };
+    }
+
+    private static String resumeDelay(IdleAutomationConfig settings, boolean styled) {
+        if (settings == null) return "Unavailable";
+        return switch (settings.resumeWait().kind()) {
+            case IDLE_TIME -> (styled ? "Idle Time (" : "Idle time (") + formatDuration(settings.idleSeconds()) + ")";
+            case IMMEDIATELY -> "Immediately";
+            case DURATION -> formatDuration(settings.resumeWait().seconds());
+        };
+    }
+
+    private static String resumeTimer(IdleAutomation automation) {
+        if (automation == null || !automation.isResumePending()) return "Not running";
+        return formatDuration((automation.ticksUntilResume() + 19) / 20) + " remaining";
     }
 
     private static String unit(long count, String name) { return count + " " + name + (count == 1 ? "" : "s"); }

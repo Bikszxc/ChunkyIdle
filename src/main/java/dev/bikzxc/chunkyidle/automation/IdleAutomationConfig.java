@@ -4,12 +4,7 @@ import dev.bikzxc.chunkyidle.ChunkyIdle;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -111,22 +106,6 @@ public record IdleAutomationConfig(boolean enabled, long idleSeconds, boolean re
         }
     }
 
-    public static IdleAutomationConfig load(Path path, Path legacyPath) throws IOException {
-        if (Files.notExists(path)) {
-            Files.createDirectories(path.getParent());
-            String yaml = defaultYaml();
-            if (Files.exists(legacyPath)) {
-                Properties old = new Properties();
-                try (var in = Files.newInputStream(legacyPath)) { old.load(in); }
-                String seconds = old.getProperty("idle-seconds", "300").trim();
-                try { yaml = yaml.replace("wait-after-empty: 10s", "wait-after-empty: " + Long.parseLong(seconds) + "s"); }
-                catch (NumberFormatException ex) { throw new IOException("The old idle-seconds setting is invalid.", ex); }
-            }
-            Files.writeString(path, yaml, StandardCharsets.UTF_8);
-        }
-        return parse(Files.readString(path, StandardCharsets.UTF_8));
-    }
-
     public static IdleAutomationConfig parse(String yaml) {
         Object root = new Load(LoadSettings.builder().build()).loadFromString(yaml);
         if (!(root instanceof Map<?, ?> map)) throw new IllegalArgumentException("The config must contain YAML settings.");
@@ -163,23 +142,5 @@ public record IdleAutomationConfig(boolean enabled, long idleSeconds, boolean re
         Object value = map.get(key);
         if (!(value instanceof Boolean result)) throw new IllegalArgumentException("Set '" + key + "' to true or false.");
         return result;
-    }
-
-    public static void setEnabledPreservingComments(Path path, boolean enabled) throws IOException {
-        String text = Files.readString(path, StandardCharsets.UTF_8);
-        String[] lines = text.split("\\R", -1);
-        boolean inAutomation = false, replaced = false;
-        for (int i = 0; i < lines.length; i++) {
-            if (!lines[i].startsWith(" ") && lines[i].trim().endsWith(":")) inAutomation = lines[i].trim().equals("automation:");
-            if (inAutomation && lines[i].matches("\\s+enabled\\s*:\\s*(true|false)(\\s+#.*)?")) {
-                lines[i] = lines[i].replaceFirst("(enabled\\s*:\\s*)(true|false)", "$1" + enabled);
-                replaced = true; break;
-            }
-        }
-        if (!replaced) throw new IOException("Could not find automation.enabled; settings were not changed.");
-        Path temp = path.resolveSibling(path.getFileName() + ".tmp");
-        Files.writeString(temp, String.join(System.lineSeparator(), lines), StandardCharsets.UTF_8);
-        try { Files.move(temp, path, java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE); }
-        catch (java.nio.file.AtomicMoveNotSupportedException ex) { Files.move(temp, path, java.nio.file.StandardCopyOption.REPLACE_EXISTING); }
     }
 }
