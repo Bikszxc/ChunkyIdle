@@ -59,6 +59,10 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+}
+
 tasks.build {
     group = "versioned"
     description = "Must run through 'chiseledBuild' - see stonecutter.gradle.kts"
