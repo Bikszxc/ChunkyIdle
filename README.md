@@ -98,7 +98,7 @@ These commands require operator permission level 2. They can be run in-game by a
 | `/chunkyidle reload` | Validates and reloads the entire YAML config. If the config is invalid, the last working settings remain active. |
 | `/chunkyidle toggle` | Turns player-based automation off or on and saves that setting in the YAML file. |
 
-When automation is toggled off, tasks already paused by ChunkyIdle stay paused. Toggling it back on does not start a new task.
+When automation is toggled off, tasks already paused by ChunkyIdle stay paused. Any tasks Chunky is currently running continue, and player joins will not automatically pause them while automation is off. Toggling automation back on does not start a new task.
 
 ## Console messages
 

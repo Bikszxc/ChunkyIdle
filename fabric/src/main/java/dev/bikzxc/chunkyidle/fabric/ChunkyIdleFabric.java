@@ -130,7 +130,14 @@ public class ChunkyIdleFabric implements ModInitializer {
             if (enabled && currentServer != null && !currentServer.getPlayerList().getPlayers().isEmpty()) automation.onPlayerJoined();
             else if (enabled) automation.onServerBecameEmpty();
             String title = enabled ? "Automation turned on." : "Automation turned off.";
-            String detail = enabled ? "Player activity will control Chunky generation." : "Paused generation will stay paused.";
+            String detail;
+            if (enabled) {
+                detail = "Player activity will control Chunky generation.";
+            } else if (!ChunkyIdleMessages.isPlayerSource(source) && automation.hasRunningTasks()) {
+                detail = "Chunky is currently generating and will continue until paused manually. Players joining will not pause it while automation is off.";
+            } else {
+                detail = "Paused generation will stay paused.";
+            }
             if (ChunkyIdleMessages.isPlayerSource(source)) ChunkyIdleLog.info(title + " " + detail);
             ChunkyIdleMessages.reply(source, ChunkyIdleMessages.Kind.SUCCESS, title, detail);
             return 1;

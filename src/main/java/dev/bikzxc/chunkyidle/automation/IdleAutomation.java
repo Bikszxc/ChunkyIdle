@@ -106,6 +106,11 @@ public final class IdleAutomation {
         return Set.copyOf(pausedByUs);
     }
 
+    public boolean hasRunningTasks() {
+        refreshRunningWorldSnapshot();
+        return !lastObservedRunningWorlds.isEmpty();
+    }
+
     public void toggleEnabled(boolean value) {
         enabled = value;
         ticksUntilResume = -1;
