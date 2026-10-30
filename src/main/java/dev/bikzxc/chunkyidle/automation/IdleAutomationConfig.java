@@ -92,6 +92,14 @@ public record IdleAutomationConfig(boolean enabled, long idleSeconds, boolean re
         return new IdleAutomationConfig(value, idleSeconds, restartEnabled, resumeScope, resumeWait);
     }
 
+    public long resumeDelaySeconds() {
+        return switch (resumeWait.kind()) {
+            case IMMEDIATELY -> 0;
+            case IDLE_TIME -> idleSeconds;
+            case DURATION -> resumeWait.seconds();
+        };
+    }
+
     public static long parseDuration(String value) {
         Matcher matcher = DURATION.matcher(value == null ? "" : value.trim());
         if (!matcher.matches()) throw new IllegalArgumentException("Use a duration such as 10s, 5m, or 1h.");

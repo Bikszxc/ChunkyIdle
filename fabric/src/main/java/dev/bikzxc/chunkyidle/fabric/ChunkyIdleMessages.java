@@ -44,6 +44,11 @@ final class ChunkyIdleMessages {
 
     static void status(CommandSourceStack source, IdleAutomationConfig settings,
                        IdleAutomation automation, boolean chunkyLoaded, MinecraftServer server) {
+        if (!isPlayerSource(source)) {
+            sendConsoleStatus(settings, automation, chunkyLoaded, server);
+            return;
+        }
+
         MutableComponent output = Component.empty()
                 .append(Component.literal("------------ [ ChunkyIdle v" + ChunkyIdle.VERSION + " ] ------------")
                         .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
@@ -89,10 +94,6 @@ final class ChunkyIdleMessages {
         } else {
             output = output.append(Component.literal("\nThe server is empty.").withStyle(ChatFormatting.GRAY));
         }
-        if (!isPlayerSource(source)) {
-            sendConsoleStatus(settings, automation, chunkyLoaded, server);
-            return;
-        }
         MutableComponent dashboard = output;
         source.sendSuccess(() -> dashboard, false);
     }
@@ -122,32 +123,32 @@ final class ChunkyIdleMessages {
         return unit(seconds, "second");
     }
 
-    private static String automationState(IdleAutomationConfig settings, boolean chunkyLoaded, boolean styled) {
+    private static String automationState(IdleAutomationConfig settings, boolean chunkyLoaded, boolean playerText) {
         if (settings == null) return "Unavailable";
-        if (!chunkyLoaded) return styled ? "Chunky Not Found" : "Chunky not found";
-        if (settings.enabled()) return styled ? "● Enabled" : "Enabled";
-        return styled ? "● Disabled" : "Disabled";
+        if (!chunkyLoaded) return playerText ? "Chunky Not Found" : "Chunky not found";
+        if (settings.enabled()) return playerText ? "● Enabled" : "Enabled";
+        return playerText ? "● Disabled" : "Disabled";
     }
 
-    private static String restartState(IdleAutomationConfig settings, boolean styled) {
+    private static String restartState(IdleAutomationConfig settings, boolean playerText) {
         if (settings == null) return "Unavailable";
-        if (!settings.restartEnabled()) return styled ? "● Disabled" : "Disabled";
-        if (settings.enabled()) return styled ? "● Enabled" : "Enabled";
-        return styled ? "● Disabled (automation off)" : "Disabled (automation is off)";
+        if (!settings.restartEnabled()) return playerText ? "● Disabled" : "Disabled";
+        if (settings.enabled()) return playerText ? "● Enabled" : "Enabled";
+        return playerText ? "● Disabled (automation off)" : "Disabled (automation is off)";
     }
 
-    private static String resumePolicy(IdleAutomationConfig settings, boolean styled) {
+    private static String resumePolicy(IdleAutomationConfig settings, boolean playerText) {
         if (settings == null) return "Unavailable";
         return switch (settings.resumeScope()) {
-            case ACTIVE_BEFORE_SHUTDOWN -> styled ? "Active Before Shutdown" : "Active before shutdown";
-            case ANY_SAVED -> styled ? "Any Saved Tasks" : "Any saved tasks (may resume tasks paused manually)";
+            case ACTIVE_BEFORE_SHUTDOWN -> playerText ? "Active Before Shutdown" : "Active before shutdown";
+            case ANY_SAVED -> playerText ? "Any Saved Tasks" : "Any saved tasks (may resume tasks paused manually)";
         };
     }
 
-    private static String resumeDelay(IdleAutomationConfig settings, boolean styled) {
+    private static String resumeDelay(IdleAutomationConfig settings, boolean playerText) {
         if (settings == null) return "Unavailable";
         return switch (settings.resumeWait().kind()) {
-            case IDLE_TIME -> (styled ? "Idle Time (" : "Idle time (") + formatDuration(settings.idleSeconds()) + ")";
+            case IDLE_TIME -> (playerText ? "Idle Time (" : "Idle time (") + formatDuration(settings.idleSeconds()) + ")";
             case IMMEDIATELY -> "Immediately";
             case DURATION -> formatDuration(settings.resumeWait().seconds());
         };

@@ -50,7 +50,18 @@ class IdleAutomationConfigTest {
         assertEquals(120, config.idleSeconds());
         assertEquals(IdleAutomationConfig.ResumeScope.ANY_SAVED, config.resumeScope());
         assertEquals(IdleAutomationConfig.WaitKind.IMMEDIATELY, config.resumeWait().kind());
+        assertEquals(0, config.resumeDelaySeconds());
         assertThrows(RuntimeException.class, () -> IdleAutomationConfig.parse("automation: [bad"));
+    }
+
+    @Test void resolvesConfiguredResumeDelayToSeconds() {
+        var idleTime = IdleAutomationConfig.parse(IdleAutomationConfig.defaultYaml()
+                .replace("wait-after-empty: 10s", "wait-after-empty: 2m"));
+        assertEquals(120, idleTime.resumeDelaySeconds());
+
+        var customDelay = IdleAutomationConfig.parse(IdleAutomationConfig.defaultYaml()
+                .replace("wait-before-resume: idle-time", "wait-before-resume: 5m"));
+        assertEquals(300, customDelay.resumeDelaySeconds());
     }
 
     @Test void togglePreservesYamlCommentsAndOtherSettings() throws Exception {

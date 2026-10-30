@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +34,7 @@ public class ChunkyIdleFabric implements ModInitializer {
 
     @Override public void onInitialize() {
         ChunkyIdle.init();
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> start(server, false));
+        ServerLifecycleEvents.SERVER_STARTED.register(ChunkyIdleFabric::start);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             if (automation != null) {
                 boolean canceledWait = automation.isResumePending();
@@ -58,7 +59,7 @@ public class ChunkyIdleFabric implements ModInitializer {
                         .then(Commands.literal("toggle").executes(ctx -> toggle(ctx.getSource())))));
     }
 
-    private static void start(MinecraftServer server, boolean reloaded) {
+    private static void start(MinecraftServer server) {
         currentServer = server;
         checkForEmptyServer = false;
         try {
@@ -69,28 +70,32 @@ public class ChunkyIdleFabric implements ModInitializer {
                 return;
             }
             automation = new IdleAutomation(new FabricChunkyTaskController(server), settings);
-            if (!reloaded && settings.enabled() && settings.restartEnabled()) {
-                Set<String> worlds = settings.resumeScope() == IdleAutomationConfig.ResumeScope.ANY_SAVED
-                        ? StreamSupport.stream(server.getAllLevels().spliterator(), false)
-                            .map(level -> FabricChunkyTaskController.worldId(level.dimension())).collect(Collectors.toSet())
-                        : RESUME_STATE.read();
-                long delay = switch (settings.resumeWait().kind()) {
-                    case IMMEDIATELY -> 0;
-                    case IDLE_TIME -> settings.idleSeconds();
-                    case DURATION -> settings.resumeWait().seconds();
-                };
-                if (!worlds.isEmpty()) {
-                    automation.recoverOnStartup(worlds, delay);
-                    if (delay == 0) ChunkyIdleLog.info("The server is ready. Saved Chunky generation will resume now.");
-                    else ChunkyIdleLog.info("Saved Chunky generation will resume after the server has been empty for {}.", ChunkyIdleMessages.formatDuration(delay));
-                }
-                else RESUME_STATE.clear();
-            }
-            if (reloaded) ChunkyIdleLog.info("Settings reloaded.");
-            else ChunkyIdleLog.info("Settings loaded. ChunkyIdle will manage generation when the server is empty.");
+            if (settings.enabled() && settings.restartEnabled()) recoverSavedTasks(server, settings, automation);
+            ChunkyIdleLog.info("Settings loaded. ChunkyIdle will manage generation when the server is empty.");
         } catch (Exception exception) {
             automation = null;
             ChunkyIdleLog.error("Settings could not be loaded. Automatic generation is off until config.yml is fixed and reloaded.", exception);
+        }
+    }
+
+    private static void recoverSavedTasks(MinecraftServer server, IdleAutomationConfig settings,
+                                          IdleAutomation automation) throws IOException {
+        Set<String> worlds = settings.resumeScope() == IdleAutomationConfig.ResumeScope.ANY_SAVED
+                ? StreamSupport.stream(server.getAllLevels().spliterator(), false)
+                    .map(level -> FabricChunkyTaskController.worldId(level.dimension())).collect(Collectors.toSet())
+                : RESUME_STATE.read();
+        if (worlds.isEmpty()) {
+            RESUME_STATE.clear();
+            return;
+        }
+
+        long delay = settings.resumeDelaySeconds();
+        automation.recoverOnStartup(worlds, delay);
+        if (delay == 0) {
+            ChunkyIdleLog.info("The server is ready. Saved Chunky generation will resume now.");
+        } else {
+            ChunkyIdleLog.info("Saved Chunky generation will resume after the server has been empty for {}.",
+                    ChunkyIdleMessages.formatDuration(delay));
         }
     }
 
@@ -104,7 +109,7 @@ public class ChunkyIdleFabric implements ModInitializer {
         } catch (IOException e) { ChunkyIdleLog.warn("Saved tasks may not be available after restart.", e); }
     }
 
-    private static int reload(net.minecraft.commands.CommandSourceStack source) {
+    private static int reload(CommandSourceStack source) {
         try {
             IdleAutomationConfig fresh = IdleAutomationConfigFile.load(CONFIG, LEGACY);
             if (currentServer != null && FabricLoader.getInstance().isModLoaded("chunky")) {
@@ -126,7 +131,7 @@ public class ChunkyIdleFabric implements ModInitializer {
         }
     }
 
-    private static int toggle(net.minecraft.commands.CommandSourceStack source) {
+    private static int toggle(CommandSourceStack source) {
         if (settings == null || automation == null) return fail(source, "ChunkyIdle is not ready.", "Check that Chunky is installed and the config has loaded.");
         boolean enabled = !settings.enabled();
         try {
@@ -153,12 +158,12 @@ public class ChunkyIdleFabric implements ModInitializer {
         }
     }
 
-    private static int status(net.minecraft.commands.CommandSourceStack source) {
+    private static int status(CommandSourceStack source) {
         ChunkyIdleMessages.status(source, settings, automation, FabricLoader.getInstance().isModLoaded("chunky"), currentServer);
         return 1;
     }
 
-    private static int fail(net.minecraft.commands.CommandSourceStack source, String title, String detail) {
+    private static int fail(CommandSourceStack source, String title, String detail) {
         ChunkyIdleMessages.reply(source, ChunkyIdleMessages.Kind.ERROR, title, detail);
         return 0;
     }
