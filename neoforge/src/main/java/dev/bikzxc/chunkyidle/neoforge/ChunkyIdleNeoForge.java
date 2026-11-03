@@ -22,9 +22,9 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 //? >=1.21.1 {
-/*import net.neoforged.neoforge.event.tick.ServerTickEvent;*/
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //?} else {
-import net.neoforged.neoforge.event.TickEvent;
+/*import net.neoforged.neoforge.event.TickEvent;*/
 //?}
 import net.neoforged.bus.api.SubscribeEvent;
 
@@ -95,11 +95,11 @@ public final class ChunkyIdleNeoForge {
     }
 
     //? >=1.21.1 {
-    /*@SubscribeEvent public void onServerTick(ServerTickEvent.Post event) { tick(event.getServer()); }*/
+    @SubscribeEvent public void onServerTick(ServerTickEvent.Post event) { tick(event.getServer()); }
     //?} else {
-    @SubscribeEvent public void onServerTick(TickEvent.ServerTickEvent event) {
+    /*@SubscribeEvent public void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) tick(event.getServer());
-    }
+    }*/
     //?}
 
     @SubscribeEvent
