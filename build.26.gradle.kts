@@ -51,6 +51,7 @@ java {
     withSourcesJar()
     val javaVersion: String by project
     val java = JavaVersion.toVersion(javaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
     sourceCompatibility = java
     targetCompatibility = java
 }

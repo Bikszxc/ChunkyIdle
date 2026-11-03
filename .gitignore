@@ -3,6 +3,20 @@
 build/
 out/
 classes/
+.env.dev
+.env*
+!.env.example
+
+# Local compatibility test tooling can contain private server connection details.
+scripts/Test-ChunkyIdleServer.ps1
+scripts/test-client/
+docs/server-test-runner.md
+versions/*/logs/
+
+# Local template and repository inspection helpers; their generated snapshot is not source.
+/project_structure.json
+/ps.py
+/setup.py
 
 # idea
 .idea/

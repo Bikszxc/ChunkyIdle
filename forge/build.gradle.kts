@@ -70,7 +70,9 @@ dependencies {
 
 java {
     withSourcesJar()
-    val java = JavaVersion.toVersion(common.property("javaVersion") as String)
+    val javaVersion = common.property("javaVersion") as String
+    val java = JavaVersion.toVersion(javaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
     sourceCompatibility = java
     targetCompatibility = java
 }
@@ -101,6 +103,7 @@ tasks.processResources {
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
     archiveClassifier.set("dev-shadow")
+    addMultiReleaseAttribute = false
     exclude("fabric.mod.json", "architectury.common.json")
 }
 

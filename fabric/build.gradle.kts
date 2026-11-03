@@ -15,6 +15,10 @@ val common = requireNotNull(stonecutter.node?.sibling("")?.project) { "No common
 
 val modId: String by project
 val modVersion: String by project
+val fabric120To1204Candidate =
+    providers.gradleProperty("candidateFabric120To1204").map(String::toBoolean).orElse(false).get() &&
+        minecraft == "1.20.1"
+val minecraftMetadata = if (fabric120To1204Candidate) ">=1.20 <=1.20.4" else minecraft
 
 version = "$modVersion+$minecraft"
 base { archivesName.set("$modId-fabric") }
@@ -65,6 +69,18 @@ val fabricLoaderVersion = common.property("fabricLoaderVersion") as String
 val fabricApiVersion = common.property("fabricApiVersion") as String
 val architecturyApiVersion = common.property("architecturyApiVersion") as String
 val clothConfigVersion = common.property("clothConfigVersion") as String
+val chunkyApiVersion = when (minecraft) {
+    "1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4" -> "1.3.146"
+    "1.20.5", "1.20.6" -> "1.4.10"
+    "1.21", "1.21.1" -> "1.4.23"
+    "1.21.2", "1.21.3", "1.21.4" -> "1.4.27"
+    "1.21.5" -> "1.4.36"
+    "1.21.6", "1.21.7", "1.21.8" -> "1.4.40"
+    "1.21.9", "1.21.10" -> "1.4.52"
+    "1.21.11" -> "1.4.55"
+    "26.1", "26.1.1", "26.1.2", "26.2", "26.3" -> "1.5.3"
+    else -> error("No Fabric Chunky API mapping configured for Minecraft $minecraft")
+}
 
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
@@ -73,7 +89,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
     modImplementation("dev.architectury:architectury-fabric:$architecturyApiVersion")
-    modCompileOnly("org.popcraft:chunky-common:1.3.146")
+    modCompileOnly("org.popcraft:chunky-common:$chunkyApiVersion")
     shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
@@ -88,7 +104,9 @@ dependencies {
 
 java {
     withSourcesJar()
-    val java = JavaVersion.toVersion(common.property("javaVersion") as String)
+    val javaVersion = common.property("javaVersion") as String
+    val java = JavaVersion.toVersion(javaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
     sourceCompatibility = java
     targetCompatibility = java
 }
@@ -110,7 +128,7 @@ tasks.processResources {
         "mod_description" to modDescription,
         "mod_authors" to modAuthors,
         "mod_license" to modLicense,
-        "minecraft_version" to minecraft,
+        "minecraft_version" to minecraftMetadata,
         "loader_version" to fabricLoaderVersion,
     )
     inputs.properties(props)
@@ -120,11 +138,13 @@ tasks.processResources {
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
     archiveClassifier.set("dev-shadow")
+    addMultiReleaseAttribute = false
 }
 
 tasks.remapJar {
     input.set(tasks.shadowJar.flatMap { it.archiveFile })
     dependsOn(tasks.shadowJar)
+    if (fabric120To1204Candidate) archiveClassifier.set("candidate-1.20-1.20.4")
 }
 
 tasks.jar {
@@ -143,9 +163,18 @@ tasks.register<Copy>("buildAndCollect") {
     dependsOn("build")
 }
 
-// Publishes this exact version+loader's jar to Modrinth/CurseForge - see
-// stonecutter.gradle.kts's publishAllMods for running every variant's at once, and
-// gradle.properties for the project IDs/dry-run switch this reads.
+tasks.register<Copy>("candidateJar") {
+    group = "versioned"
+    description = "Builds the Fabric 1.20–1.20.4 shared-jar candidate from Minecraft 1.20.1."
+    onlyIf { fabric120To1204Candidate }
+    from(tasks.remapJar.flatMap { it.archiveFile })
+    into(rootProject.layout.buildDirectory.dir("candidates/fabric"))
+    dependsOn(tasks.build)
+}
+
+// Publishes this version+loader's jar to Modrinth/CurseForge. Candidate mode widens
+// the listed Minecraft versions for its one anchor artifact; it remains a dry run
+// unless explicitly configured otherwise.
 val modrinthProjectId: String by project
 val curseforgeProjectId: String by project
 
@@ -159,13 +188,19 @@ publishMods {
     modrinth {
         projectId.set(modrinthProjectId)
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(
+            if (fabric120To1204Candidate) listOf("1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4")
+            else listOf(minecraft)
+        )
         environment.set(SERVER_ONLY)
     }
     curseforge {
         projectId.set(curseforgeProjectId)
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(
+            if (fabric120To1204Candidate) listOf("1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4")
+            else listOf(minecraft)
+        )
         client.set(false)
         server.set(true)
     }

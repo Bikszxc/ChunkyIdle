@@ -169,7 +169,7 @@ final class ChunkyIdleMessages {
     }
 
     private static MutableComponent hovered(String text, ChatFormatting color, String description) {
-        //? <1.21.6 {
+        //? <1.21.5 {
         return Component.literal(text).withStyle(style -> style.withColor(color)
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(description))));
         //?} else {

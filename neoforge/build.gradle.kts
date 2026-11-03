@@ -15,6 +15,11 @@ val common = requireNotNull(stonecutter.node?.sibling("")?.project) { "No common
 
 val modId: String by project
 val modVersion: String by project
+val neoForge1202To1204Candidate = providers.gradleProperty("candidateNeoForge1202To1204")
+    .map(String::toBoolean)
+    .orElse(false)
+    .get() && minecraft == "1.20.2"
+val legacyNeoForgeMetadata = minecraft == "1.20.2" || minecraft == "1.20.4"
 
 version = "$modVersion+$minecraft"
 base { archivesName.set("$modId-neoforge") }
@@ -40,6 +45,7 @@ configurations {
 
 repositories {
     maven("https://maven.neoforged.net/releases/")
+    maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://maven.shedaniel.me/") // Cloth Config
 }
 
@@ -52,6 +58,15 @@ loom {
 val neoforgeVersion = common.property("neoforgeVersion") as String
 val architecturyApiVersion = common.property("architecturyApiVersion") as String
 val clothConfigVersion = common.property("clothConfigVersion") as String
+val chunkyApiVersion = when (minecraft) {
+    "1.20.2", "1.20.4" -> "1.3.146"
+    "1.21.1" -> "1.4.23"
+    "1.21.6", "1.21.7", "1.21.8" -> "1.4.40"
+    "1.21.9", "1.21.10" -> "1.4.52"
+    "1.21.11" -> "1.4.54"
+    "26.1", "26.1.1", "26.1.2", "26.2", "26.3" -> "1.5.4"
+    else -> error("No NeoForge Chunky API mapping configured for Minecraft $minecraft")
+}
 
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
@@ -59,6 +74,7 @@ dependencies {
 
     "neoForge"("net.neoforged:neoforge:$neoforgeVersion")
     modImplementation("dev.architectury:architectury-neoforge:$architecturyApiVersion")
+    modCompileOnly("org.popcraft:chunky-common:$chunkyApiVersion")
     shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
@@ -73,7 +89,9 @@ dependencies {
 
 java {
     withSourcesJar()
-    val java = JavaVersion.toVersion(common.property("javaVersion") as String)
+    val javaVersion = common.property("javaVersion") as String
+    val java = JavaVersion.toVersion(javaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
     sourceCompatibility = java
     targetCompatibility = java
 }
@@ -95,15 +113,23 @@ tasks.processResources {
         "mod_description" to modDescription,
         "mod_authors" to modAuthors,
         "mod_license" to modLicense,
+        "loader_version" to if (legacyNeoForgeMetadata) "[1,)" else "[2,)",
         "minecraft_version" to minecraft,
+        "minecraft_version_range" to if (neoForge1202To1204Candidate) "[1.20.2,1.20.5)" else "[$minecraft,)",
     )
     inputs.properties(props)
     filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
+    if (legacyNeoForgeMetadata) {
+        eachFile {
+            if (path == "META-INF/neoforge.mods.toml") path = "META-INF/mods.toml"
+        }
+    }
 }
 
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
     archiveClassifier.set("dev-shadow")
+    addMultiReleaseAttribute = false
     exclude("fabric.mod.json", "architectury.common.json")
 }
 
@@ -126,6 +152,17 @@ tasks.register<Copy>("buildAndCollect") {
     from(tasks.remapJar.get().archiveFile, tasks.remapSourcesJar.get().archiveFile)
     into(rootProject.layout.buildDirectory.file("libs/$modVersion/neoforge"))
     dependsOn("build")
+}
+
+if (neoForge1202To1204Candidate) {
+    tasks.register<Copy>("candidateJar") {
+        group = "build"
+        description = "Builds the NeoForge 1.20.2–1.20.4 shared-jar candidate from Minecraft 1.20.2."
+        from(tasks.remapJar.flatMap { it.archiveFile })
+        rename { "$modId-neoforge-$modVersion+$minecraft-candidate-1.20.2-1.20.4.jar" }
+        into(rootProject.layout.buildDirectory.dir("candidates/neoforge"))
+        dependsOn(tasks.remapJar)
+    }
 }
 
 // Publishes this exact version+loader's jar to Modrinth/CurseForge - see

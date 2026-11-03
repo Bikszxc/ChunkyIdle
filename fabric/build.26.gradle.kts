@@ -53,6 +53,7 @@ val fabricLoaderVersion = common.property("fabricLoaderVersion") as String
 val fabricApiVersion = common.property("fabricApiVersion") as String
 val architecturyApiVersion = common.property("architecturyApiVersion") as String
 val clothConfigVersion = common.property("clothConfigVersion") as String
+val chunkyApiVersion = "1.5.3"
 
 dependencies {
     // No `mappings(...)` here - see the header comment above.
@@ -61,7 +62,7 @@ dependencies {
     implementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
     implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
     implementation("dev.architectury:architectury-fabric:$architecturyApiVersion")
-    compileOnly("org.popcraft:chunky-common:1.3.146")
+    compileOnly("org.popcraft:chunky-common:$chunkyApiVersion")
     shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
@@ -76,7 +77,9 @@ dependencies {
 
 java {
     withSourcesJar()
-    val java = JavaVersion.toVersion(common.property("javaVersion") as String)
+    val javaVersion = common.property("javaVersion") as String
+    val java = JavaVersion.toVersion(javaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
     sourceCompatibility = java
     targetCompatibility = java
 }
@@ -111,6 +114,7 @@ tasks.processResources {
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
     archiveClassifier.set("")
+    addMultiReleaseAttribute = false
 }
 
 tasks.jar {
