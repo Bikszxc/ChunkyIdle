@@ -33,7 +33,7 @@ The following other targets now compile in the build matrix, but still need dedi
 | NeoForge | 1.21.1, 1.21.6–1.21.11, 26.1.x–26.3 | See [loader-specific Chunky compatibility](docs/CHUNKY_VERSION_PARITY.md) |
 | Forge | 1.20.1 | 1.3.146 |
 
-Builds normally produce version-specific jars with exact Minecraft metadata. The Fabric 1.20–1.20.4 candidate was runtime-verified across its declared range. The NeoForge 1.20.2–1.20.4 candidate also uses one jar across its declared range. Both remain unpublished pending release packaging. See the [Fabric candidate test record](docs/fabric-1.20-1.20.4-candidate.md).
+Builds normally produce version-specific jars with exact Minecraft metadata. The Fabric 1.20–1.20.4 and NeoForge 1.20.2–1.20.4 shared-jar candidates remain unpublished pending release packaging. See the [Fabric candidate test record](docs/fabric/versions/1.20-1.20.4-candidate.md) and [NeoForge candidate test record](docs/neoforge/versions/1.20.2-1.20.4-candidate.md).
 
 ## Install
 
