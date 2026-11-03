@@ -93,7 +93,9 @@ tasks.processResources {
         "mod_description" to modDescription,
         "mod_authors" to modAuthors,
         "mod_license" to modLicense,
+        "loader_version" to "[2,)",
         "minecraft_version" to minecraft,
+        "minecraft_version_range" to "[$minecraft,)",
     )
     inputs.properties(props)
     filesMatching("META-INF/neoforge.mods.toml") { expand(props) }

@@ -55,7 +55,13 @@ public final class ChunkyIdleNeoForge {
     public void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("chunkyidle")
-                .requires(source -> source.hasPermission(2))
+                .requires(source ->
+                        //? <1.21.11 {
+                        source.hasPermission(2)
+                        //?} else {
+                        /*source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)*/
+                        //?}
+                )
                 .then(Commands.literal("reload").executes(context -> reload(context.getSource())))
                 .then(Commands.literal("status").executes(context -> status(context.getSource())))
                 .then(Commands.literal("toggle").executes(context -> toggle(context.getSource()))));
