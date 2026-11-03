@@ -6,6 +6,7 @@ import dev.bikzxc.chunkyidle.ChunkyIdleLog;
 import dev.bikzxc.chunkyidle.automation.IdleAutomation;
 import dev.bikzxc.chunkyidle.automation.IdleAutomationConfig;
 import dev.bikzxc.chunkyidle.automation.IdleAutomationConfigFile;
+import dev.bikzxc.chunkyidle.automation.ResumeStateStore;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -39,7 +40,7 @@ public final class ChunkyIdleNeoForge {
     private static final Path DIRECTORY = FMLPaths.CONFIGDIR.get().resolve("chunkyidle");
     private static final Path CONFIG = DIRECTORY.resolve("config.yml");
     private static final Path LEGACY = FMLPaths.CONFIGDIR.get().resolve("chunkyidle.properties");
-    private static final NeoForgeResumeStateStore RESUME_STATE = new NeoForgeResumeStateStore(DIRECTORY.resolve("resume-state.txt"));
+    private static final ResumeStateStore RESUME_STATE = new ResumeStateStore(DIRECTORY.resolve("resume-state.txt"));
 
     private IdleAutomation automation;
     private IdleAutomationConfig settings;

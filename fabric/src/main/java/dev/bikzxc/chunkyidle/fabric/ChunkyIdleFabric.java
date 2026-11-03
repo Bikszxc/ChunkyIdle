@@ -5,6 +5,7 @@ import dev.bikzxc.chunkyidle.ChunkyIdleLog;
 import dev.bikzxc.chunkyidle.automation.IdleAutomation;
 import dev.bikzxc.chunkyidle.automation.IdleAutomationConfig;
 import dev.bikzxc.chunkyidle.automation.IdleAutomationConfigFile;
+import dev.bikzxc.chunkyidle.automation.ResumeStateStore;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -26,7 +27,7 @@ public class ChunkyIdleFabric implements ModInitializer {
     private static final Path DIRECTORY = FabricLoader.getInstance().getConfigDir().resolve("chunkyidle");
     private static final Path CONFIG = DIRECTORY.resolve("config.yml");
     private static final Path LEGACY = FabricLoader.getInstance().getConfigDir().resolve("chunkyidle.properties");
-    private static final FabricResumeStateStore RESUME_STATE = new FabricResumeStateStore(DIRECTORY.resolve("resume-state.txt"));
+    private static final ResumeStateStore RESUME_STATE = new ResumeStateStore(DIRECTORY.resolve("resume-state.txt"));
     @Nullable private static IdleAutomation automation;
     @Nullable private static IdleAutomationConfig settings;
     @Nullable private static MinecraftServer currentServer;
