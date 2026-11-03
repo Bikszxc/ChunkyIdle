@@ -1,148 +1,123 @@
 # Chunky Idle
 
-**Chunky Idle** is a small server-side companion for [Chunky](https://modrinth.com/mod/chunky). When a player joins, it pauses Chunky generation tasks that are currently running. After the server has been empty for the configured time, it continues the tasks ChunkyIdle paused.
+**Keep Chunky world generation out of players’ way.** Chunky Idle pauses active Chunky tasks when a player joins and resumes those tasks after the server has been empty for a configurable time. It preserves Chunky’s saved progress and never starts a generation task for you.
 
-It preserves Chunky's saved progress and never creates or starts a generation task. Optional restart recovery can continue eligible saved tasks after a graceful server restart.
+Chunky Idle runs on the server. Players do not need to install it on their clients.
 
-## Compatibility
+<p>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/chunky-idle"><img src="https://img.shields.io/badge/Available%20on-CurseForge-F16436?style=for-the-badge&logo=curseforge&logoColor=white" alt="Available on CurseForge"></a>
+  <a href="https://modrinth.com/mod/ECodck3H"><img src="https://img.shields.io/badge/Available%20on-Modrinth-1BD96A?style=for-the-badge&logo=modrinth&logoColor=white" alt="Available on Modrinth"></a>
+</p>
 
-ChunkyIdle runs on dedicated servers and does not need to be installed on clients. The versions below have been tested with the latest Chunky release available for each Minecraft version and loader. Chunky versions were checked against [Chunky's Modrinth releases](https://modrinth.com/plugin/chunky/versions) on October 31, 2026.
-
-## Tested Versions
-
-| Minecraft Version(s) | Loader | Chunky Version | Compatible? |
-| --- | --- | --- | --- |
-| 1.20–1.20.4 | Fabric | 1.3.146 | ✅ Shared-jar candidate runtime-verified; not released |
-| 1.20.2–1.20.4 | NeoForge | 1.3.146 | ✅ Shared-jar candidate tested; not released |
-| 1.21.1 | Fabric, NeoForge | 1.4.23 | ✅ Tested |
-| 1.21.6–1.21.8 | Fabric, NeoForge | 1.4.40 | ✅ Tested |
-| 1.21.9–1.21.10 | Fabric, NeoForge | 1.4.52 | ✅ Tested |
-| 1.21.11 | Fabric | 1.4.55 | ✅ Tested |
-| 1.21.11 | NeoForge | 1.4.54 | ✅ Tested |
-| 26.1, 26.1.1, 26.1.2, 26.2 | Fabric | 1.5.3 | ✅ Tested |
-| 26.1, 26.1.1, 26.1.2, 26.2 | NeoForge | 1.5.4 | ✅ Tested |
-
-The Fabric 1.20–1.20.4 row was checked using the same shared-jar candidate on all five Minecraft versions. Startup, join pause, and idle resume passed on each. Commands and restart recovery were also checked on 1.20.4. The NeoForge 1.20.2–1.20.4 shared-jar candidate was used on all three versions, and the test bot joined and left successfully on each. Neither candidate is a release artifact yet.
-
-The following other targets now compile in the build matrix, but still need dedicated-server runtime checks before being advertised as tested:
-
-| Loader | Configured Minecraft targets | Chunky release line |
-| --- | --- | --- |
-| Fabric | 1.20–1.20.6, 1.21–1.21.11, 26.1.x–26.3 | See the [version parity and work tracker](docs/CHUNKY_VERSION_PARITY.md) |
-| NeoForge | 1.21.1, 1.21.6–1.21.11, 26.1.x–26.3 | See the [version parity and work tracker](docs/CHUNKY_VERSION_PARITY.md) |
-
-Builds normally produce version-specific jars with exact Minecraft metadata. The Fabric 1.20–1.20.4 and NeoForge 1.20.2–1.20.4 shared-jar candidates remain unpublished pending release packaging. See the [Fabric candidate test record](docs/fabric/versions/1.20-1.20.4-candidate.md) and [NeoForge candidate test record](docs/neoforge/versions/1.20.2-1.20.4-candidate.md).
+Install the file that matches both your Minecraft version and loader. Chunky Idle requires [Chunky](https://modrinth.com/mod/chunky) on the server.
 
 ## Install
 
-1. Set up a dedicated server for a tested Minecraft version using a loader supported by that release.
-2. Install the latest Chunky release available for that Minecraft version.
-3. Place the matching ChunkyIdle loader jar in the server's `mods` folder.
-4. Start the server. ChunkyIdle creates `config/chunkyidle/config.yml` on first startup.
+1. Set up a dedicated server with Fabric or NeoForge for a supported Minecraft version.
+2. Install Chunky and the matching Chunky Idle jar in the server’s `mods` folder.
+3. Start the server. On first startup, Chunky Idle creates `config/chunkyidle/config.yml`.
+4. Start or configure world generation with Chunky’s commands. Chunky Idle only manages tasks that Chunky has saved; it does not start tasks itself.
 
-ChunkyIdle is inactive when Chunky is not installed. It does not automatically start a Chunky task; start or configure generation with Chunky's own commands.
+## At a glance
 
-## How it works
+- A player joining pauses Chunky tasks that are running at that time.
+- When the last player leaves, an empty-server timer starts. A player joining during the wait cancels it.
+- If the server stays empty until the timer expires, Chunky Idle continues the tasks it paused.
+- Starting a new Chunky task while players are already online does not pause that task until another player joins.
+- Optional restart recovery can continue eligible saved tasks after a graceful restart.
 
-- When a player joins, ChunkyIdle pauses Chunky tasks that are running at that time.
-- When the last player leaves, the empty-server timer begins. A new join cancels the timer.
-- If the server remains empty until the timer expires, ChunkyIdle continues the tasks it paused.
-- It only resumes saved tasks. It does not create a task or change a task's world or selection.
-- If an operator starts a new Chunky task while players are already online, ChunkyIdle does not automatically pause that new task unless another player joins.
+## Compatibility
 
-## Configuration
+The Fabric versions below were checked with the latest compatible Chunky release available at the time. Chunky versions were checked against [Chunky’s Modrinth releases](https://modrinth.com/plugin/chunky/versions) on October 31, 2026.
 
-Edit `config/chunkyidle/config.yml` while the server is stopped, or run `/chunkyidle reload` after editing. Newly generated configs use a 10-second empty-server wait. Existing config values are kept as-is when updating ChunkyIdle.
+| Minecraft | Loader | Chunky | Status |
+| --- | --- | --- | --- |
+| 1.21.1 | Fabric | 1.4.23 | Tested |
+| 1.21.6–1.21.8 | Fabric | 1.4.40 | Tested |
+| 1.21.9–1.21.10 | Fabric | 1.4.52 | Tested |
+| 1.21.11 | Fabric | 1.4.55 | Tested |
+| 26.1, 26.1.1, 26.1.2, 26.2 | Fabric | 1.5.3 | Tested |
 
-```yaml
-#========================================#
-#              ChunkyIdle                #
-#                v0.1.0                  #
-#               by Bikzxc                 #
-#========================================#
-#
-# Automatically manages Chunky world generation based on server activity.
-# Support: https://github.com/Bikszxc/ChunkyIdle
-#
+Other configured targets compile in the build matrix, but still need dedicated-server runtime checks before being described as tested:
 
-#----------------------------------------#
-#              AUTOMATION                #
-#----------------------------------------#
+| Loader | Build targets |
+| --- | --- |
+| Fabric | 1.20–1.20.6, 1.21–1.21.11, 26.1.x–26.3 |
+| NeoForge | 1.21.1, 1.21.6–1.21.11, 26.1.x–26.3 |
 
-automation:
-  # Pause running Chunky tasks when a player joins, then continue them after the server is empty.
-  enabled: true
-
-  # Time the server must remain empty before Chunky continues saved tasks.
-  # Use an integer and one lowercase unit: s (seconds), m (minutes), or h (hours).
-  # Examples: 10s, 5m, 1h
-  wait-after-empty: 10s
-
-
-#----------------------------------------#
-#            SERVER RESTART              #
-#----------------------------------------#
-
-server-restart:
-  # Continue eligible saved tasks after a graceful server restart.
-  enabled: true
-
-  # active-before-shutdown resumes tasks running or paused by ChunkyIdle at shutdown.
-  # any-saved may also resume tasks an administrator paused manually.
-  tasks-to-resume: active-before-shutdown
-
-  # idle-time uses automation.wait-after-empty.
-  # immediately resumes as the server starts.
-  # Or use a duration such as 10s, 5m, or 1h, measured from startup.
-  wait-before-resume: idle-time
-```
-
-The only accepted restart policies are `active-before-shutdown` and `any-saved`. The restart delay accepts `idle-time`, `immediately`, or a duration. Durations must use a single unit, so `1h30m` is not supported.
-
-If `config/chunkyidle/config.yml` does not exist but the old `config/chunkyidle.properties` file does, ChunkyIdle carries over its `idle-seconds` value to the new YAML config. The old file is left in place. Once a YAML config exists, its values are not automatically changed.
-
-### Restart recovery notes
-
-- By default, `active-before-shutdown` uses the task worlds ChunkyIdle observed running, plus the tasks it paused, when the server shuts down gracefully.
-- `any-saved` tries saved tasks in loaded worlds and may resume work an administrator paused manually.
-- An abrupt crash may not save the latest task snapshot.
-- If a player joins during a pending startup recovery wait, that wait is canceled. When the server becomes empty again, the normal `wait-after-empty` timer applies.
+See the [version parity and work tracker](docs/CHUNKY_VERSION_PARITY.md) for Chunky release mappings and runtime test progress.
 
 ## Commands
 
-These commands require operator permission level 2. They can be run in-game by an OP or from the server console.
+All commands require operator permission level 2. Run them in-game as an operator or from the server console.
 
-| Command | What it does |
+| Command | Description |
 | --- | --- |
-| `/chunkyidle status` | Shows the loaded settings and current automation state. In-game, setting labels have hover descriptions. |
-| `/chunkyidle reload` | Validates and reloads the entire YAML config. If the config is invalid, the last working settings remain active. |
-| `/chunkyidle toggle` | Turns player-based automation off or on and saves that setting in the YAML file. |
+| `/chunkyidle status` | Shows loaded settings and the current automation state. In-game, setting labels include hover descriptions. |
+| `/chunkyidle reload` | Validates and reloads the YAML configuration. If it is invalid, the last working settings stay active. |
+| `/chunkyidle toggle` | Turns player-based automation off or on and saves the setting. |
 
-When automation is toggled off, tasks already paused by ChunkyIdle stay paused. Any tasks Chunky is currently running continue, and player joins will not automatically pause them while automation is off. Toggling automation back on does not start a new task.
+When automation is turned off, running tasks continue and tasks already paused by Chunky Idle stay paused. Player joins will not automatically pause running tasks while automation is off. Turning automation back on does not start a task.
 
-## Console messages
+## Configuration
 
-ChunkyIdle messages include a visible `[ChunkyIdle]` prefix. For example:
+The default configuration waits 10 seconds after the server becomes empty and enables restart recovery. Edit `config/chunkyidle/config.yml` while the server is stopped, or run `/chunkyidle reload` after editing.
 
-```text
-[ChunkyIdle] Server is empty. Chunky will resume in 10 seconds.
-[ChunkyIdle] Server has been empty for 10 seconds. Resuming Chunky.
+```yaml
+automation:
+  enabled: true
+  wait-after-empty: 10s
+
+server-restart:
+  enabled: true
+  tasks-to-resume: active-before-shutdown
+  wait-before-resume: idle-time
 ```
 
-If a player joins during the wait, ChunkyIdle reports that the pending resume wait was canceled. `/chunkyidle status` prints a plain, prefixed summary in the console and a styled dashboard in-game.
+| Setting | Description |
+| --- | --- |
+| `automation.enabled` | Enables or disables player-based pausing and resuming. |
+| `automation.wait-after-empty` | Empty-server wait. Use an integer and one lowercase unit: seconds (`s`), minutes (`m`), or hours (`h`), for example `10s`, `5m`, or `1h`. |
+| `server-restart.enabled` | Enables recovery of eligible tasks after a graceful restart. |
+| `server-restart.tasks-to-resume` | `active-before-shutdown` resumes task worlds Chunky Idle recorded as running or paused by it. `any-saved` can also resume tasks an administrator paused manually. |
+| `server-restart.wait-before-resume` | `idle-time` uses `automation.wait-after-empty`; `immediately` resumes when startup is ready; or set a duration such as `10s`, `5m`, or `1h`. |
+
+Durations use a single unit, so `1h30m` is not supported. Existing config values are preserved when updating Chunky Idle. If the YAML file does not exist but the old `config/chunkyidle.properties` file does, Chunky Idle carries over its `idle-seconds` value; the old file is left in place.
+
+### Restart recovery details
+
+- `active-before-shutdown` records worlds Chunky Idle observed running and tasks it paused when the server shuts down gracefully.
+- `any-saved` checks saved tasks in loaded worlds and may resume work an administrator paused manually.
+- An abrupt crash may not save the latest task snapshot.
+- If a player joins during a pending startup recovery wait, that wait is canceled. When the server becomes empty again, the normal `wait-after-empty` timer applies.
 
 ## Troubleshooting
 
-- **ChunkyIdle says Chunky was not found:** check that Chunky is installed in the server's `mods` folder and enabled for the server.
-- **Settings could not be loaded:** fix the invalid YAML or unsupported value in `config/chunkyidle/config.yml`, then run `/chunkyidle reload`. On startup with an invalid config, automation stays inactive until the config is fixed and loaded.
-- **A saved task did not resume after a restart:** check that the shutdown was graceful, `server-restart.enabled` and `automation.enabled` are both `true`, and the selected policy includes the saved task.
-- **A task continues after `any-saved` is selected:** this policy may also resume a task paused manually by an administrator. Use `active-before-shutdown` to limit recovery to tasks ChunkyIdle recorded.
+- **Chunky Idle says Chunky was not found:** Make sure Chunky is installed and enabled on the server.
+- **Settings could not be loaded:** Fix the invalid YAML or unsupported value in `config/chunkyidle/config.yml`, then run `/chunkyidle reload`. If startup config loading fails, automation stays inactive until the config is fixed and reloaded.
+- **A task did not resume after restart:** Confirm the server shut down gracefully, both `server-restart.enabled` and `automation.enabled` are `true`, and the selected recovery policy includes that task.
+- **A manually paused task resumed:** `any-saved` can include tasks paused by an administrator. Use `active-before-shutdown` to limit recovery to tasks Chunky Idle recorded.
+
+## Development
+
+Build every configured Minecraft version and loader target with:
+
+```sh
+./gradlew chiseledBuild
+```
+
+On Windows, use `gradlew.bat chiseledBuild`. See the [version parity and work tracker](docs/CHUNKY_VERSION_PARITY.md) for build and runtime test coverage.
+
+## Help and links
+
+- [Report a bug or request a feature](https://github.com/Bikszxc/ChunkyIdle/issues)
+- [Source code](https://github.com/Bikszxc/ChunkyIdle)
+- [Chunky on Modrinth](https://modrinth.com/mod/chunky)
+
+<p>
+  <a href="https://ko-fi.com/bikzxc"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Buy me a coffee at Ko-fi"></a>
+</p>
 
 ## License
 
-ChunkyIdle is distributed under the [MIT License](LICENSE).
-
-## Links
-
-- [Source code and issue tracker](https://github.com/Bikszxc/ChunkyIdle)
-- [Chunky on Modrinth](https://modrinth.com/mod/chunky)
+Chunky Idle is distributed under the [MIT License](LICENSE).
