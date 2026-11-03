@@ -38,6 +38,7 @@ configurations {
 
 repositories {
     maven("https://maven.neoforged.net/releases/")
+    maven("https://repo.codemc.io/repository/maven-public/") // Chunky's published API
     maven("https://maven.shedaniel.me/") // Cloth Config
 }
 
@@ -46,6 +47,7 @@ repositories {
 val neoforgeVersion = common.property("neoforgeVersion") as String
 val architecturyApiVersion = common.property("architecturyApiVersion") as String
 val clothConfigVersion = common.property("clothConfigVersion") as String
+val chunkyApiVersion = "1.5.4"
 
 dependencies {
     // No `mappings(...)` here - see the header comment above.
@@ -53,6 +55,7 @@ dependencies {
 
     "neoForge"("net.neoforged:neoforge:$neoforgeVersion")
     implementation("dev.architectury:architectury-neoforge:$architecturyApiVersion")
+    compileOnly("org.popcraft:chunky-common:$chunkyApiVersion")
 
     // Optional/soft dependency: compile against it, and have it on the dev
     // run's classpath, but don't bundle it or require it at runtime - see
@@ -66,7 +69,9 @@ dependencies {
 
 java {
     withSourcesJar()
-    val java = JavaVersion.toVersion(common.property("javaVersion") as String)
+    val javaVersion = common.property("javaVersion") as String
+    val java = JavaVersion.toVersion(javaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
     sourceCompatibility = java
     targetCompatibility = java
 }
@@ -88,7 +93,9 @@ tasks.processResources {
         "mod_description" to modDescription,
         "mod_authors" to modAuthors,
         "mod_license" to modLicense,
+        "loader_version" to "[2,)",
         "minecraft_version" to minecraft,
+        "minecraft_version_range" to "[$minecraft,)",
     )
     inputs.properties(props)
     filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
@@ -100,6 +107,7 @@ tasks.processResources {
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
     archiveClassifier.set("")
+    addMultiReleaseAttribute = false
     exclude("fabric.mod.json", "architectury.common.json")
 }
 

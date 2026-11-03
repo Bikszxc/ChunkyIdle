@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[2,)"
+loaderVersion = "${loader_version}"
 license = "${mod_license}"
 
 [[mods]]
@@ -12,6 +12,7 @@ description = "${mod_description}"
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
+mandatory = true
 versionRange = "[1,)"
 ordering = "NONE"
 side = "BOTH"
@@ -19,7 +20,8 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
-versionRange = "[${minecraft_version},)"
+mandatory = true
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
@@ -27,5 +29,6 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "cloth-config"
 type = "optional"
+mandatory = false
 ordering = "NONE"
 side = "BOTH"

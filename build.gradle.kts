@@ -2,7 +2,7 @@
 // settings.gradle.kts's "Supported versions" - 26.1+ uses build.26.gradle.kts instead):
 // copied once per version into versions/<mcVersion>/, where it becomes that version's
 // `common` project - the classic Architectury common module, shared by
-// that version's fabric/forge/neoforge projects (see their own
+// that version's Fabric/NeoForge projects (see their own
 // build.gradle.kts). 26.2 uses build.26.gradle.kts instead - see
 // settings.gradle.kts and README.md.
 
@@ -22,7 +22,7 @@ base { archivesName.set("$modId-common") }
 // Tells the Architectury plugin which loaders this Minecraft version
 // actually builds for, by asking Stonecutter which loader branches include
 // the version currently being evaluated - so 1.20.1 resolves to
-// [fabric, forge, neoforge] while 1.21.1 resolves to [fabric, neoforge],
+// [fabric] on 1.20.1 and [fabric, neoforge] where both are configured,
 // with no per-version conditionals needed here.
 architectury.common(stonecutter.tree.branches.mapNotNull {
     if (stonecutter.current.project !in it) null
@@ -48,7 +48,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
 
     // The loader-agnostic Architectury API (registries, events, networking,
-    // ...) - fabric/forge/neoforge each additionally pull in their own
+    // ...) - Fabric and NeoForge additionally pull in their own
     // dev.architectury:architectury-<loader> implementation of this.
     modImplementation("dev.architectury:architectury:$architecturyApiVersion")
 
@@ -60,6 +60,7 @@ java {
     withSourcesJar()
     val javaVersion: String by project
     val java = JavaVersion.toVersion(javaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
     sourceCompatibility = java
     targetCompatibility = java
 }
