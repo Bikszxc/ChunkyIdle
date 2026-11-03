@@ -7,7 +7,7 @@ Last updated: 2026-11-04
 ## Current status
 
 - **Build matrix:** Pass. `:chiseledBuild -x test` built every currently configured Fabric and NeoForge target on this date. Test tasks were skipped.
-- **Shared candidates:** Fabric 1.20–1.20.4 and NeoForge 1.20.2–1.20.4 each use one candidate jar across the listed range. Neither candidate is released.
+- **Shared candidates:** Every configured Fabric target is covered by one of nine shared candidate jars, grouped by Chunky's compatibility ranges. Fabric candidates are unpublished and await manual runtime verification. NeoForge 1.20.2–1.20.4 uses one candidate jar; it is unreleased.
 - **Runtime coverage:** See the loader tables below. Build success is recorded separately from in-game checks.
 
 ### Status key
@@ -23,17 +23,17 @@ Last updated: 2026-11-04
 
 | Minecraft | Chunky | ChunkyIdle target | Build | Runtime | Remaining work |
 | --- | --- | --- | --- | --- | --- |
-| 1.20–1.20.4 | 1.3.146 | Shared candidate | Pass | Pass: startup, join pause, and idle resume on all five versions; commands and restart recovery checked on 1.20.4 | Package and release the candidate when release checks are complete. [Test record](fabric/versions/1.20-1.20.4-candidate.md) |
-| 1.20.5–1.20.6 | 1.4.10 | Per-version targets | Pass | Pending | Run server checks on both versions. |
-| 1.21 | 1.4.23 | Per-version target | Pass | Pending | Run server checks. |
-| 1.21.1 | 1.4.23 | Per-version target | Pass | Pass | No current runtime work recorded. |
-| 1.21.2–1.21.4 | 1.4.27 | Per-version targets | Pass | Pending | Run server checks on each version. |
-| 1.21.5 | 1.4.36 | Per-version target | Pass | Pending | Run server checks. |
-| 1.21.6–1.21.8 | 1.4.40 | Per-version targets | Pass | Pass | No current runtime work recorded. |
-| 1.21.9–1.21.10 | 1.4.52 | Per-version targets | Pass | Pass | No current runtime work recorded. |
-| 1.21.11 | 1.4.55 | Per-version target | Pass | Pass | No current runtime work recorded. |
-| 26.1, 26.1.1, 26.1.2, 26.2 | 1.5.3 | Per-version targets | Pass | Pass | No current runtime work recorded. |
-| 26.3 | 1.5.3 | Per-version target | Pass | Pending | Run server checks. |
+| 1.20–1.20.4 | 1.3.146 | Shared candidate | Pass | Pass: startup, join pause, and idle resume on all five versions; commands and restart recovery checked on 1.20.4 | Manual verification record exists; candidate remains unpublished. [Test record](fabric/versions/1.20-1.20.4-candidate.md) |
+| 1.20.5–1.20.6 | 1.4.10 | Shared candidate | Pass | Pending | Manually verify candidate on both versions. |
+| 1.21 | 1.4.23 | Shared candidate | Pass | Pending | Manually verify candidate. |
+| 1.21.1 | 1.4.23 | Shared candidate | Pass | Pass | Existing runtime pass; manually verify candidate artifact. |
+| 1.21.2–1.21.4 | 1.4.27 | Shared candidate | Pass | Pending | Manually verify candidate on each version. |
+| 1.21.5 | 1.4.36 | Shared candidate | Pass | Pending | Manually verify candidate. |
+| 1.21.6–1.21.8 | 1.4.40 | Shared candidate | Pass | Pass | Existing runtime pass; manually verify candidate artifact. |
+| 1.21.9–1.21.10 | 1.4.52 | Shared candidate | Pass | Pass | Existing runtime pass; manually verify candidate artifact. |
+| 1.21.11 | 1.4.55 | Shared candidate | Pass | Pass | Existing runtime pass; manually verify candidate artifact. |
+| 26.1, 26.1.1, 26.1.2, 26.2 | 1.5.3 | Shared candidate | Pass | Pass | Existing runtime pass; manually verify candidate artifact. |
+| 26.3 | 1.5.3 | Shared candidate | Pass | Pending | Manually verify candidate. |
 
 ## NeoForge
 
