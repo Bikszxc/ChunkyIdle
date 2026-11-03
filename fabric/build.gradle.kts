@@ -63,7 +63,7 @@ loom {
 // javaVersion/fabricLoaderVersion/fabricApiVersion/architecturyApiVersion/
 // clothConfigVersion live in versions/<mcVersion>/gradle.properties, which -
 // unlike this repo's root gradle.properties - is only an ancestor directory
-// of the `common` project, not of `fabric`/`forge`/`neoforge`. Route through
+// of the `common` project, not of `fabric`/`neoforge`. Route through
 // the sibling `common` project to read them.
 val fabricLoaderVersion = common.property("fabricLoaderVersion") as String
 val fabricApiVersion = common.property("fabricApiVersion") as String

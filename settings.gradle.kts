@@ -1,8 +1,8 @@
 // This project's structure is a modernized version of the (now archived)
 // official https://github.com/stonecutter-versioning/stonecutter-template-architectury :
 // Stonecutter handles the *Minecraft version* axis (it turns the root
-// `common`/`fabric`/`forge`/`neoforge` projects into one copy per targeted
-// version under versions/<mcVersion>/<loader>/), while those four projects
+// `common`/`fabric`/`neoforge` projects into one copy per targeted
+// version under versions/<mcVersion>/<loader>/), while those three projects
 // use the classic Architectury multiloader split for the *loader* axis.
 // See README.md for the reasoning and for the alternative, non-Architectury
 // https://github.com/stonecutter-versioning/stonecutter-template-multiloader
@@ -13,7 +13,6 @@ pluginManagement {
         mavenCentral()
         maven("https://maven.fabricmc.net/") { name = "Fabric" }
         maven("https://maven.architectury.dev/") { name = "Architectury" }
-        maven("https://maven.minecraftforge.net/") { name = "Forge" }
         maven("https://maven.neoforged.net/releases/") { name = "NeoForge" }
         maven("https://maven.kikugie.dev/releases") { name = "Stonecutter" }
     }
@@ -49,8 +48,6 @@ stonecutter {
             versions("1.21.1", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10", "1.21.11")
             versions("26.1", "26.1.1", "26.1.2", "26.2", "26.3").buildscript("build.26.gradle.kts")
         }
-
-        branch("forge") { versions("1.20.1") }
 
         vcsVersion = "1.20.1"
     }

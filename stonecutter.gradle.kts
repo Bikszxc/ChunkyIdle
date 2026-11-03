@@ -13,7 +13,7 @@ plugins {
 
 // The version opened by default in the IDE / by a bare `./gradlew build`.
 // Switch it with the Stonecutter IntelliJ plugin, or target a specific
-// version's tasks directly, e.g. `./gradlew :1.20.1:forge:build`.
+// version's tasks directly, e.g. `./gradlew :fabric:1.20.1:build`.
 stonecutter active "1.21.1" /* [SC] DO NOT EDIT */
 
 // Builds every Minecraft version x loader combo in one go - the jars land in each
@@ -33,7 +33,7 @@ tasks.register("chiseledBuild") {
 tasks.register("publishAllMods") {
     group = "project"
     description = "Publishes every Minecraft version x loader variant to Modrinth/CurseForge."
-    // Only the fabric/forge/neoforge branches apply the publish plugin - the bare common
+    // Only the Fabric/NeoForge branches apply the publish plugin - the bare common
     // branch (empty branch id) never gets built into something that itself ships, so it
     // has no publishMods task to depend on.
     dependsOn(stonecutter.tasks.named("publishMods") { branch.id.isNotEmpty() }.map { it.values })

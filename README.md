@@ -13,7 +13,6 @@ ChunkyIdle runs on dedicated servers and does not need to be installed on client
 | Minecraft Version(s) | Loader | Chunky Version | Compatible? |
 | --- | --- | --- | --- |
 | 1.20–1.20.4 | Fabric | 1.3.146 | ✅ Shared-jar candidate runtime-verified; not released |
-| 1.20.1 | Forge | 1.3.146 | ✅ Tested |
 | 1.20.2–1.20.4 | NeoForge | 1.3.146 | ✅ Shared-jar candidate tested; not released |
 | 1.21.1 | Fabric, NeoForge | 1.4.23 | ✅ Tested |
 | 1.21.6–1.21.8 | Fabric, NeoForge | 1.4.40 | ✅ Tested |
@@ -31,7 +30,6 @@ The following other targets now compile in the build matrix, but still need dedi
 | --- | --- | --- |
 | Fabric | 1.20–1.20.6, 1.21–1.21.11, 26.1.x–26.3 | See the [version parity and work tracker](docs/CHUNKY_VERSION_PARITY.md) |
 | NeoForge | 1.21.1, 1.21.6–1.21.11, 26.1.x–26.3 | See the [version parity and work tracker](docs/CHUNKY_VERSION_PARITY.md) |
-| Forge | 1.20.1 | 1.3.146 |
 
 Builds normally produce version-specific jars with exact Minecraft metadata. The Fabric 1.20–1.20.4 and NeoForge 1.20.2–1.20.4 shared-jar candidates remain unpublished pending release packaging. See the [Fabric candidate test record](docs/fabric/versions/1.20-1.20.4-candidate.md) and [NeoForge candidate test record](docs/neoforge/versions/1.20.2-1.20.4-candidate.md).
 

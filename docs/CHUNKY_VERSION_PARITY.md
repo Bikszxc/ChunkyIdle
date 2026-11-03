@@ -6,7 +6,7 @@ Last updated: 2026-11-04
 
 ## Current status
 
-- **Build matrix:** Pass. `:chiseledBuild -x test` built every currently configured Fabric, NeoForge, and Forge target on this date. Test tasks were skipped.
+- **Build matrix:** Pass. `:chiseledBuild -x test` built every currently configured Fabric and NeoForge target on this date. Test tasks were skipped.
 - **Shared candidates:** Fabric 1.20–1.20.4 and NeoForge 1.20.2–1.20.4 each use one candidate jar across the listed range. Neither candidate is released.
 - **Runtime coverage:** See the loader tables below. Build success is recorded separately from in-game checks.
 
@@ -50,13 +50,6 @@ Last updated: 2026-11-04
 | 26.1, 26.1.1, 26.1.2, 26.2 | 1.5.4 | Per-version targets | Pass | Pass | No current runtime work recorded. |
 | 26.3 | 1.5.4 | Per-version target | Pass | Pending | Run server checks. |
 
-## Forge
-
-| Minecraft | Chunky | ChunkyIdle target | Build | Runtime | Remaining work |
-| --- | --- | --- | --- | --- | --- |
-| 1.20.1 | 1.3.146 | Per-version target | Pass | Pass | No current runtime work recorded. |
-| Other Chunky-supported ranges | See compatibility table below | No target | — | Pending | Forge coverage is currently limited to 1.20.1. |
-
 ## Chunky compatibility mappings
 
 These mappings describe Chunky releases. They do not expand ChunkyIdle's build targets above.
@@ -87,19 +80,6 @@ These mappings describe Chunky releases. They do not expand ChunkyIdle's build t
 | 1.4.40 | 1.21.6–1.21.8 |
 | 1.4.52 | 1.21.9–1.21.10 |
 | 1.4.54 | 1.21.11 |
-| 1.5.4 | 26.1.x–26.3 |
-
-### Forge
-
-| Chunky | Minecraft |
-| --- | --- |
-| 1.3.146 | 1.20–1.20.1 |
-| 1.4.23 | 1.21–1.21.1 |
-| 1.4.27 | 1.21.2–1.21.4 |
-| 1.4.36 | 1.21.5 |
-| 1.4.40 | 1.21.6–1.21.8 |
-| 1.4.52 | 1.21.9–1.21.10 |
-| 1.4.55 | 1.21.11 |
 | 1.5.4 | 26.1.x–26.3 |
 
 ## Shared-jar policy
