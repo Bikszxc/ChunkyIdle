@@ -13,6 +13,10 @@ val common = requireNotNull(stonecutter.node?.sibling("")?.project) { "No common
 
 val modId: String by project
 val modVersion: String by project
+val candidateRange = providers.gradleProperty("candidateNeoForgeRange").orNull
+val neoForgeCandidate = candidateRange == "26.1-26.3" && minecraft == "26.1"
+val candidateVersions = listOf("26.1", "26.1.1", "26.1.2", "26.2", "26.3")
+val minecraftVersionRange = if (neoForgeCandidate) "[26.1,26.4)" else "[$minecraft,)"
 
 version = "$modVersion+$minecraft"
 base { archivesName.set("$modId-neoforge") }
@@ -56,6 +60,7 @@ dependencies {
     "neoForge"("net.neoforged:neoforge:$neoforgeVersion")
     implementation("dev.architectury:architectury-neoforge:$architecturyApiVersion")
     compileOnly("org.popcraft:chunky-common:$chunkyApiVersion")
+    shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
     // run's classpath, but don't bundle it or require it at runtime - see
@@ -95,7 +100,7 @@ tasks.processResources {
         "mod_license" to modLicense,
         "loader_version" to "[2,)",
         "minecraft_version" to minecraft,
-        "minecraft_version_range" to "[$minecraft,)",
+        "minecraft_version_range" to minecraftVersionRange,
     )
     inputs.properties(props)
     filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
@@ -106,7 +111,7 @@ tasks.processResources {
 // distributable - shadowJar's output has to become the distributable directly here.
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
-    archiveClassifier.set("")
+    archiveClassifier.set(if (neoForgeCandidate) "candidate-26.1-26.3" else "")
     addMultiReleaseAttribute = false
     exclude("fabric.mod.json", "architectury.common.json")
 }
@@ -120,6 +125,15 @@ tasks.register<Copy>("buildAndCollect") {
     from(tasks.shadowJar.get().archiveFile, tasks.named<Jar>("sourcesJar").get().archiveFile)
     into(rootProject.layout.buildDirectory.file("libs/$modVersion/neoforge"))
     dependsOn("build")
+}
+
+tasks.register<Copy>("candidateJar") {
+    group = "versioned"
+    description = "Builds the NeoForge 26.1–26.3 shared-jar candidate."
+    onlyIf { neoForgeCandidate }
+    from(tasks.shadowJar.flatMap { it.archiveFile })
+    into(rootProject.layout.buildDirectory.dir("candidates/neoforge"))
+    dependsOn(tasks.build)
 }
 
 tasks.build {
@@ -144,12 +158,12 @@ publishMods {
     modrinth {
         projectId.set(modrinthProjectId)
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(if (neoForgeCandidate) candidateVersions else listOf(minecraft))
     }
     curseforge {
         projectId.set(curseforgeProjectId)
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(if (neoForgeCandidate) candidateVersions else listOf(minecraft))
         client.set(true)
         server.set(true)
     }

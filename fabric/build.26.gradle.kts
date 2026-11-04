@@ -13,6 +13,10 @@ val common = requireNotNull(stonecutter.node?.sibling("")?.project) { "No common
 
 val modId: String by project
 val modVersion: String by project
+val candidateRange = providers.gradleProperty("candidateFabricRange").orNull
+val fabricCandidate = candidateRange == "26.1-26.3" && minecraft == "26.1"
+val candidateVersions = listOf("26.1", "26.1.1", "26.1.2", "26.2", "26.3")
+val minecraftMetadata = if (fabricCandidate) ">=26.1 <=26.3" else minecraft
 
 version = "$modVersion+$minecraft"
 base { archivesName.set("$modId-fabric") }
@@ -101,7 +105,7 @@ tasks.processResources {
         "mod_description" to modDescription,
         "mod_authors" to modAuthors,
         "mod_license" to modLicense,
-        "minecraft_version" to minecraft,
+        "minecraft_version" to minecraftMetadata,
         "loader_version" to fabricLoaderVersion,
     )
     inputs.properties(props)
@@ -113,7 +117,7 @@ tasks.processResources {
 // distributable - shadowJar's output has to become the distributable directly here.
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
-    archiveClassifier.set("")
+    archiveClassifier.set(if (fabricCandidate) "candidate-26.1-26.3" else "")
     addMultiReleaseAttribute = false
 }
 
@@ -134,6 +138,15 @@ tasks.register<Copy>("buildAndCollect") {
     dependsOn("build")
 }
 
+tasks.register<Copy>("candidateJar") {
+    group = "versioned"
+    description = "Builds the Fabric 26.1–26.3 shared-jar candidate."
+    onlyIf { fabricCandidate }
+    from(tasks.shadowJar.flatMap { it.archiveFile })
+    into(rootProject.layout.buildDirectory.dir("candidates/fabric"))
+    dependsOn(tasks.build)
+}
+
 // Publishes this exact version+loader's jar to Modrinth/CurseForge - see
 // stonecutter.gradle.kts's publishAllMods for running every variant's at once, and
 // gradle.properties for the project IDs/dry-run switch this reads.
@@ -150,12 +163,12 @@ publishMods {
     modrinth {
         projectId.set(modrinthProjectId)
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(if (fabricCandidate) candidateVersions else listOf(minecraft))
     }
     curseforge {
         projectId.set(curseforgeProjectId)
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(if (fabricCandidate) candidateVersions else listOf(minecraft))
         client.set(true)
         server.set(true)
     }

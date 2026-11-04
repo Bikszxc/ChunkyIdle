@@ -15,10 +15,19 @@ val common = requireNotNull(stonecutter.node?.sibling("")?.project) { "No common
 
 val modId: String by project
 val modVersion: String by project
-val neoForge1202To1204Candidate = providers.gradleProperty("candidateNeoForge1202To1204")
-    .map(String::toBoolean)
-    .orElse(false)
-    .get() && minecraft == "1.20.2"
+val candidateRanges = mapOf(
+    "1.20.2-1.20.4" to Triple("1.20.2", "[1.20.2,1.20.5)", listOf("1.20.2", "1.20.3", "1.20.4")),
+    "1.20.5-1.20.6" to Triple("1.20.5", "[1.20.5,1.20.7)", listOf("1.20.5", "1.20.6")),
+    "1.21-1.21.1" to Triple("1.21", "[1.21,1.21.2)", listOf("1.21", "1.21.1")),
+    "1.21.2-1.21.4" to Triple("1.21.2", "[1.21.2,1.21.5)", listOf("1.21.2", "1.21.3", "1.21.4")),
+    "1.21.5" to Triple("1.21.5", "[1.21.5,1.21.6)", listOf("1.21.5")),
+    "1.21.6-1.21.8" to Triple("1.21.6", "[1.21.6,1.21.9)", listOf("1.21.6", "1.21.7", "1.21.8")),
+    "1.21.9-1.21.10" to Triple("1.21.9", "[1.21.9,1.21.11)", listOf("1.21.9", "1.21.10")),
+    "1.21.11" to Triple("1.21.11", "[1.21.11,)", listOf("1.21.11")),
+)
+val candidateRange = providers.gradleProperty("candidateNeoForgeRange").orNull
+val candidate = candidateRange?.let(candidateRanges::get)
+val neoForgeCandidate = candidate != null && minecraft == candidate.first
 val legacyNeoForgeMetadata = minecraft == "1.20.2" || minecraft == "1.20.4"
 
 version = "$modVersion+$minecraft"
@@ -56,11 +65,15 @@ loom {
 // These live in versions/1.21.1/gradle.properties, only an ancestor of
 // `common` - see the same comment in fabric/build.gradle.kts.
 val neoforgeVersion = common.property("neoforgeVersion") as String
-val architecturyApiVersion = common.property("architecturyApiVersion") as String
+val architecturyApiVersion = (common.findProperty("neoforgeArchitecturyApiVersion")
+    ?: common.property("architecturyApiVersion")) as String
 val clothConfigVersion = common.property("clothConfigVersion") as String
 val chunkyApiVersion = when (minecraft) {
     "1.20.2", "1.20.4" -> "1.3.146"
-    "1.21.1" -> "1.4.23"
+    "1.20.5", "1.20.6" -> "1.4.10"
+    "1.21", "1.21.1" -> "1.4.23"
+    "1.21.2", "1.21.3", "1.21.4" -> "1.4.27"
+    "1.21.5" -> "1.4.36"
     "1.21.6", "1.21.7", "1.21.8" -> "1.4.40"
     "1.21.9", "1.21.10" -> "1.4.52"
     "1.21.11" -> "1.4.54"
@@ -115,7 +128,7 @@ tasks.processResources {
         "mod_license" to modLicense,
         "loader_version" to if (legacyNeoForgeMetadata) "[1,)" else "[2,)",
         "minecraft_version" to minecraft,
-        "minecraft_version_range" to if (neoForge1202To1204Candidate) "[1.20.2,1.20.5)" else "[$minecraft,)",
+        "minecraft_version_range" to if (neoForgeCandidate) candidate!!.second else "[$minecraft,)",
     )
     inputs.properties(props)
     filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
@@ -136,6 +149,7 @@ tasks.shadowJar {
 tasks.remapJar {
     input.set(tasks.shadowJar.flatMap { it.archiveFile })
     dependsOn(tasks.shadowJar)
+    if (neoForgeCandidate) archiveClassifier.set("candidate-$candidateRange")
 }
 
 tasks.jar {
@@ -154,15 +168,13 @@ tasks.register<Copy>("buildAndCollect") {
     dependsOn("build")
 }
 
-if (neoForge1202To1204Candidate) {
-    tasks.register<Copy>("candidateJar") {
-        group = "build"
-        description = "Builds the NeoForge 1.20.2–1.20.4 shared-jar candidate from Minecraft 1.20.2."
-        from(tasks.remapJar.flatMap { it.archiveFile })
-        rename { "$modId-neoforge-$modVersion+$minecraft-candidate-1.20.2-1.20.4.jar" }
-        into(rootProject.layout.buildDirectory.dir("candidates/neoforge"))
-        dependsOn(tasks.remapJar)
-    }
+tasks.register<Copy>("candidateJar") {
+    group = "build"
+    description = "Builds a NeoForge shared-jar candidate from its range anchor version."
+    onlyIf { neoForgeCandidate }
+    from(tasks.remapJar.flatMap { it.archiveFile })
+    into(rootProject.layout.buildDirectory.dir("candidates/neoforge"))
+    dependsOn(tasks.remapJar)
 }
 
 // Publishes this exact version+loader's jar to Modrinth/CurseForge - see
@@ -181,12 +193,12 @@ publishMods {
     modrinth {
         projectId.set(modrinthProjectId)
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(if (neoForgeCandidate) candidate!!.third else listOf(minecraft))
     }
     curseforge {
         projectId.set(curseforgeProjectId)
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
-        minecraftVersions.add(minecraft)
+        minecraftVersions.addAll(if (neoForgeCandidate) candidate!!.third else listOf(minecraft))
         client.set(true)
         server.set(true)
     }
