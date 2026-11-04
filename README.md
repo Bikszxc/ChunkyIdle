@@ -21,17 +21,7 @@ Chunky Idle is a server-side companion for [Chunky](https://modrinth.com/mod/chu
 
 ## Runtime-tested compatibility
 
-Fabric builds runtime-tested with the listed Chunky versions:
-
-| Minecraft | Chunky |
-| --- | --- |
-| 1.21.1 | 1.4.23 |
-| 1.21.6–1.21.8 | 1.4.40 |
-| 1.21.9–1.21.10 | 1.4.52 |
-| 1.21.11 | 1.4.55 |
-| 26.1, 26.1.1, 26.1.2, 26.2 | 1.5.3 |
-
-See the [Wiki compatibility page](https://github.com/Bikszxc/ChunkyIdle/wiki/Compatibility) for the full matrix and targets still awaiting runtime checks.
+All configured shared candidate jars for Fabric and NeoForge have passed runtime testing. See the [Wiki compatibility page](https://github.com/Bikszxc/ChunkyIdle/wiki/Compatibility) for the full version and loader matrix.
 
 ## Documentation
 

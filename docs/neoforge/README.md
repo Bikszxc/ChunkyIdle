@@ -25,4 +25,4 @@ Build each candidate from the first NeoForge target in its range. The build scri
 | 1.21.11 | 1.21.11 | `1.21.11` |
 | 26.1–26.3 | 26.1 | `26.1-26.3` |
 
-Artifacts are collected in `build/candidates/neoforge/`. Candidate artifacts are unpublished; building does not certify runtime compatibility across the range. Complete manual server checks before release.
+Artifacts are collected in `build/candidates/neoforge/`. All configured NeoForge shared candidates have passed runtime testing and remain unpublished pending release packaging. See the [compatibility matrix](../CHUNKY_VERSION_PARITY.md#neoforge) for status by range.

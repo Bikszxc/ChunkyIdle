@@ -25,4 +25,4 @@ Build a candidate from the first Minecraft version in its range, passing the ran
 | 1.21.11 | 1.21.11 | `1.21.11` |
 | 26.1–26.3 | 26.1 | `26.1-26.3` |
 
-Artifacts are collected in `build/candidates/fabric/`. These are unpublished candidates. Runtime checks remain pending until the owner completes manual server testing; building a candidate does not certify the whole range.
+Artifacts are collected in `build/candidates/fabric/`. All configured Fabric shared candidates have passed runtime testing and remain unpublished pending release packaging. See the [compatibility matrix](../CHUNKY_VERSION_PARITY.md#fabric) for status by range.
