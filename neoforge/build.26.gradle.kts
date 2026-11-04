@@ -60,6 +60,7 @@ dependencies {
     "neoForge"("net.neoforged:neoforge:$neoforgeVersion")
     implementation("dev.architectury:architectury-neoforge:$architecturyApiVersion")
     compileOnly("org.popcraft:chunky-common:$chunkyApiVersion")
+    shadowBundle("org.snakeyaml:snakeyaml-engine:2.10")
 
     // Optional/soft dependency: compile against it, and have it on the dev
     // run's classpath, but don't bundle it or require it at runtime - see
