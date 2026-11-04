@@ -25,16 +25,30 @@ tasks.register("chiseledBuild") {
     dependsOn(stonecutter.tasks.named("build").map { it.values })
 }
 
-// Publishes every Minecraft version x loader variant to Modrinth/CurseForge in one go -
-// see each loader's build.gradle.kts's publishMods block for what actually gets sent, and
-// gradle.properties for the project IDs and dry-run switch. Defaults to a dry run (logs
-// what it would've done, uploads nothing) until you set real project IDs, MODRINTH_TOKEN/
-// CURSEFORGE_TOKEN, and pass -Ppublish.dryRun=false.
+// Publishes one runtime-tested shared candidate per loader/compatibility range. The anchor
+// projects infer their candidate range from this task name, so callers don't need to pass
+// per-range properties. Defaults to a dry run until -Ppublish.dryRun=false is passed.
 tasks.register("publishAllMods") {
     group = "project"
-    description = "Publishes every Minecraft version x loader variant to Modrinth/CurseForge."
-    // Only the Fabric/NeoForge branches apply the publish plugin - the bare common
-    // branch (empty branch id) never gets built into something that itself ships, so it
-    // has no publishMods task to depend on.
-    dependsOn(stonecutter.tasks.named("publishMods") { branch.id.isNotEmpty() }.map { it.values })
+    description = "Publishes tested shared Fabric and NeoForge candidates to Modrinth/CurseForge."
+    dependsOn(
+        ":fabric:1.20.1:publishMods",
+        ":fabric:1.20.5:publishMods",
+        ":fabric:1.21:publishMods",
+        ":fabric:1.21.2:publishMods",
+        ":fabric:1.21.5:publishMods",
+        ":fabric:1.21.6:publishMods",
+        ":fabric:1.21.9:publishMods",
+        ":fabric:1.21.11:publishMods",
+        ":fabric:26.1:publishMods",
+        ":neoforge:1.20.2:publishMods",
+        ":neoforge:1.20.5:publishMods",
+        ":neoforge:1.21:publishMods",
+        ":neoforge:1.21.2:publishMods",
+        ":neoforge:1.21.5:publishMods",
+        ":neoforge:1.21.6:publishMods",
+        ":neoforge:1.21.9:publishMods",
+        ":neoforge:1.21.11:publishMods",
+        ":neoforge:26.1:publishMods",
+    )
 }

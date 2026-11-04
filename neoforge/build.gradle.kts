@@ -25,7 +25,9 @@ val candidateRanges = mapOf(
     "1.21.9-1.21.10" to Triple("1.21.9", "[1.21.9,1.21.11)", listOf("1.21.9", "1.21.10")),
     "1.21.11" to Triple("1.21.11", "[1.21.11,)", listOf("1.21.11")),
 )
+val publishAllModsRequested = gradle.startParameter.taskNames.any { it.trim(':') == "publishAllMods" }
 val candidateRange = providers.gradleProperty("candidateNeoForgeRange").orNull
+    ?: if (publishAllModsRequested) candidateRanges.entries.firstOrNull { it.value.first == minecraft }?.key else null
 val candidate = candidateRange?.let(candidateRanges::get)
 val neoForgeCandidate = candidate != null && minecraft == candidate.first
 val legacyNeoForgeMetadata = minecraft == "1.20.2" || minecraft == "1.20.4"
@@ -187,7 +189,8 @@ val curseforgeProjectId: String by project
 
 publishMods {
     file.set(tasks.remapJar.flatMap { it.archiveFile })
-    changelog.set(providers.environmentVariable("CHANGELOG").orElse("See the commit history."))
+    changelog.set(providers.environmentVariable("CHANGELOG").orElse(rootProject.file("CHANGELOG.md").readText()))
+    displayName.set("ChunkyIdle v${project.version}")
     type.set(STABLE)
     modLoaders.add("neoforge")
     dryRun.set(providers.gradleProperty("publish.dryRun").map(String::toBoolean).orElse(true))
@@ -195,13 +198,14 @@ publishMods {
     modrinth {
         projectId.set(modrinthProjectId)
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
+        environment.set(SERVER_ONLY)
         minecraftVersions.addAll(if (neoForgeCandidate) candidate!!.third else listOf(minecraft))
     }
     curseforge {
         projectId.set(curseforgeProjectId)
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
         minecraftVersions.addAll(if (neoForgeCandidate) candidate!!.third else listOf(minecraft))
-        client.set(true)
+        client.set(false)
         server.set(true)
     }
 }

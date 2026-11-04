@@ -13,7 +13,9 @@ val common = requireNotNull(stonecutter.node?.sibling("")?.project) { "No common
 
 val modId: String by project
 val modVersion: String by project
+val publishAllModsRequested = gradle.startParameter.taskNames.any { it.trim(':') == "publishAllMods" }
 val candidateRange = providers.gradleProperty("candidateNeoForgeRange").orNull
+    ?: if (publishAllModsRequested && minecraft == "26.1") "26.1-26.3" else null
 val neoForgeCandidate = candidateRange == "26.1-26.3" && minecraft == "26.1"
 val candidateVersions = listOf("26.1", "26.1.1", "26.1.2", "26.2", "26.3")
 val minecraftVersionRange = if (neoForgeCandidate) "[26.1,26.4)" else "[$minecraft,)"
@@ -151,7 +153,8 @@ val curseforgeProjectId: String by project
 
 publishMods {
     file.set(tasks.shadowJar.flatMap { it.archiveFile })
-    changelog.set(providers.environmentVariable("CHANGELOG").orElse("See the commit history."))
+    changelog.set(providers.environmentVariable("CHANGELOG").orElse(rootProject.file("CHANGELOG.md").readText()))
+    displayName.set("ChunkyIdle v${project.version}")
     type.set(STABLE)
     modLoaders.add("neoforge")
     dryRun.set(providers.gradleProperty("publish.dryRun").map(String::toBoolean).orElse(true))
@@ -159,13 +162,14 @@ publishMods {
     modrinth {
         projectId.set(modrinthProjectId)
         accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
+        environment.set(SERVER_ONLY)
         minecraftVersions.addAll(if (neoForgeCandidate) candidateVersions else listOf(minecraft))
     }
     curseforge {
         projectId.set(curseforgeProjectId)
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
         minecraftVersions.addAll(if (neoForgeCandidate) candidateVersions else listOf(minecraft))
-        client.set(true)
+        client.set(false)
         server.set(true)
     }
 }
