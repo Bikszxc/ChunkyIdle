@@ -7,7 +7,7 @@ Last updated: 2026-11-04
 ## Current status
 
 - **Build matrix:** Pass. `:chiseledBuild -x test` built every currently configured Fabric and NeoForge target on this date. Test tasks were skipped.
-- **Shared candidates:** Every configured Fabric target is covered by one of nine shared candidate jars, grouped by Chunky's compatibility ranges. Fabric candidates are unpublished and await manual runtime verification. NeoForge 1.20.2–1.20.4 uses one candidate jar; it is unreleased.
+- **Shared candidates:** Every configured Fabric and NeoForge target is covered by shared candidate jars grouped by Chunky's compatibility ranges. All nine candidates for each loader have been built and remain unpublished. Runtime verification remains separate and awaits manual candidate checks.
 - **Runtime coverage:** See the loader tables below. Build success is recorded separately from in-game checks.
 
 ### Status key
@@ -39,16 +39,15 @@ Last updated: 2026-11-04
 
 | Minecraft | Chunky | ChunkyIdle target | Build | Runtime | Remaining work |
 | --- | --- | --- | --- | --- | --- |
-| 1.20.2–1.20.4 | 1.3.146 | Shared candidate | Pass: candidate built from 1.20.2; 1.20.4 target also builds | Partial: the bot logged in, joined, and left on all three versions | Verify pause-on-join, idle resume, commands, and restart recovery against the NeoForge integration. 1.20.3 has no standalone build target. [Test record](neoforge/versions/1.20.2-1.20.4-candidate.md) |
-| 1.20.5–1.20.6 | 1.4.10 | No target | — | Pending | Add NeoForge build targets only if coverage is expanded. |
-| 1.21 | 1.4.23 | No target | — | Pending | Add a target only if coverage is expanded. |
-| 1.21.1 | 1.4.23 | Per-version target | Pass | Pass | No current runtime work recorded. |
-| 1.21.2–1.21.5 | 1.4.27–1.4.36 | No target | — | Pending | Add targets only if coverage is expanded. |
-| 1.21.6–1.21.8 | 1.4.40 | Per-version targets | Pass | Pass | No current runtime work recorded. |
-| 1.21.9–1.21.10 | 1.4.52 | Per-version targets | Pass | Pass | No current runtime work recorded. |
-| 1.21.11 | 1.4.54 | Per-version target | Pass | Pass | No current runtime work recorded. |
-| 26.1, 26.1.1, 26.1.2, 26.2 | 1.5.4 | Per-version targets | Pass | Pass | No current runtime work recorded. |
-| 26.3 | 1.5.4 | Per-version target | Pass | Pending | Run server checks. |
+| 1.20.2–1.20.4 | 1.3.146 | Shared candidate | Pass; 1.20.3 has no standalone target | Partial: the bot logged in, joined, and left on all three versions | Manually verify pause-on-join, idle resume, commands, and restart recovery on the candidate. [Test record](neoforge/versions/1.20.2-1.20.4-candidate.md) |
+| 1.20.5–1.20.6 | 1.4.10 | Shared candidate | Pass | Pending | Manually verify candidate on both versions. |
+| 1.21–1.21.1 | 1.4.23 | Shared candidate | Pass | Partial: existing 1.21.1 runtime pass | Manually verify the shared candidate on both versions. |
+| 1.21.2–1.21.4 | 1.4.27 | Shared candidate | Pass | Pending | Manually verify candidate on all three versions. |
+| 1.21.5 | 1.4.36 | Shared candidate | Pass | Pending | Manually verify candidate. |
+| 1.21.6–1.21.8 | 1.4.40 | Shared candidate | Pass | Pass on existing targets | Manually verify the shared candidate artifact. |
+| 1.21.9–1.21.10 | 1.4.52 | Shared candidate | Pass | Pass on existing targets | Manually verify the shared candidate artifact. |
+| 1.21.11 | 1.4.54 | Shared candidate | Pass | Pass | Manually verify the shared candidate artifact. |
+| 26.1–26.3 | 1.5.4 | Shared candidate | Pass | Pass on 26.1–26.2; 26.3 pending | Manually verify candidate across the range. |
 
 ## Chunky compatibility mappings
 

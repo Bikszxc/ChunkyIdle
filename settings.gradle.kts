@@ -44,8 +44,10 @@ stonecutter {
         }
 
         branch("neoforge") {
-            versions("1.20.2", "1.20.4")
-            versions("1.21.1", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10", "1.21.11")
+            // NeoForge first published a stable 1.20.2 line; there is no
+            // standalone 1.20.3 target. Shared candidates may still declare it.
+            versions("1.20.2", "1.20.4", "1.20.5", "1.20.6")
+            versions("1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10", "1.21.11")
             versions("26.1", "26.1.1", "26.1.2", "26.2", "26.3").buildscript("build.26.gradle.kts")
         }
 

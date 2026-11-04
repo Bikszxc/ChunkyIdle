@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-//? >=1.21.1 {
+//? >=1.20.5 {
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //?} else {
 /*import net.neoforged.neoforge.event.TickEvent;*/
@@ -101,7 +101,7 @@ public final class ChunkyIdleNeoForge {
         checkForEmptyServer = true;
     }
 
-    //? >=1.21.1 {
+    //? >=1.20.5 {
     @SubscribeEvent public void onServerTick(ServerTickEvent.Post event) { tick(event.getServer()); }
     //?} else {
     /*@SubscribeEvent public void onServerTick(TickEvent.ServerTickEvent event) {
