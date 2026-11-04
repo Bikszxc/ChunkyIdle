@@ -25,4 +25,4 @@ Build a candidate from the first Minecraft version in its range, passing the ran
 | 1.21.11 | 1.21.11 | `1.21.11` |
 | 26.1–26.3 | 26.1 | `26.1-26.3` |
 
-Artifacts are collected in `build/candidates/fabric/`. All configured Fabric shared candidates have passed runtime testing and remain unpublished pending release packaging. See the [compatibility matrix](../CHUNKY_VERSION_PARITY.md#fabric) for status by range.
+Artifacts are collected in `build/candidates/fabric/<range>/` (for example, `build/candidates/fabric/1.20-1.20.4/chunkyidle-fabric-0.1.1-mc1.20.1.jar`). All configured Fabric shared candidates have passed runtime testing and remain unpublished pending release packaging. See the [compatibility matrix](../CHUNKY_VERSION_PARITY.md#fabric) for status by range.

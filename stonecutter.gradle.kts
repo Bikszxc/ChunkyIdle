@@ -18,7 +18,7 @@ stonecutter active "1.21.1" /* [SC] DO NOT EDIT */
 
 // Builds every Minecraft version x loader combo in one go - the jars land in each
 // <loader>/versions/<mc>/build/libs/ (the un-classified one, e.g. alotofinterior-fabric-
-// 0.1.0+1.21.1.jar, is the real distributable - the others are dev-only intermediates).
+// 0.1.1+1.21.1.jar, is the real distributable - the others are dev-only intermediates).
 tasks.register("chiseledBuild") {
     group = "project"
     description = "Builds every Minecraft version x loader variant."

@@ -111,7 +111,8 @@ tasks.processResources {
 // distributable - shadowJar's output has to become the distributable directly here.
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
-    archiveClassifier.set(if (neoForgeCandidate) "candidate-26.1-26.3" else "")
+    if (neoForgeCandidate) archiveFileName.set("chunkyidle-neoforge-$modVersion-mc26.1.jar")
+    else archiveClassifier.set("")
     addMultiReleaseAttribute = false
     exclude("fabric.mod.json", "architectury.common.json")
 }
@@ -132,7 +133,7 @@ tasks.register<Copy>("candidateJar") {
     description = "Builds the NeoForge 26.1–26.3 shared-jar candidate."
     onlyIf { neoForgeCandidate }
     from(tasks.shadowJar.flatMap { it.archiveFile })
-    into(rootProject.layout.buildDirectory.dir("candidates/neoforge"))
+    into(rootProject.layout.buildDirectory.dir("candidates/neoforge/26.1-26.3"))
     dependsOn(tasks.build)
 }
 

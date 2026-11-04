@@ -154,7 +154,9 @@ tasks.shadowJar {
 tasks.remapJar {
     input.set(tasks.shadowJar.flatMap { it.archiveFile })
     dependsOn(tasks.shadowJar)
-    if (fabricCandidate) archiveClassifier.set("candidate-$candidateRange")
+    if (fabricCandidate) {
+        archiveFileName.set("chunkyidle-fabric-$modVersion-mc${candidate!!.first}.jar")
+    }
 }
 
 tasks.jar {
@@ -178,7 +180,7 @@ tasks.register<Copy>("candidateJar") {
     description = "Builds a Fabric shared-jar candidate from its range anchor version."
     onlyIf { fabricCandidate }
     from(tasks.remapJar.flatMap { it.archiveFile })
-    into(rootProject.layout.buildDirectory.dir("candidates/fabric"))
+    into(rootProject.layout.buildDirectory.dir("candidates/fabric/$candidateRange"))
     dependsOn(tasks.build)
 }
 

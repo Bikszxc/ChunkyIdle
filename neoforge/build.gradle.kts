@@ -149,7 +149,9 @@ tasks.shadowJar {
 tasks.remapJar {
     input.set(tasks.shadowJar.flatMap { it.archiveFile })
     dependsOn(tasks.shadowJar)
-    if (neoForgeCandidate) archiveClassifier.set("candidate-$candidateRange")
+    if (neoForgeCandidate) {
+        archiveFileName.set("chunkyidle-neoforge-$modVersion-mc${candidate!!.first}.jar")
+    }
 }
 
 tasks.jar {
@@ -173,7 +175,7 @@ tasks.register<Copy>("candidateJar") {
     description = "Builds a NeoForge shared-jar candidate from its range anchor version."
     onlyIf { neoForgeCandidate }
     from(tasks.remapJar.flatMap { it.archiveFile })
-    into(rootProject.layout.buildDirectory.dir("candidates/neoforge"))
+    into(rootProject.layout.buildDirectory.dir("candidates/neoforge/$candidateRange"))
     dependsOn(tasks.remapJar)
 }
 

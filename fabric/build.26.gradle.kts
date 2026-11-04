@@ -117,7 +117,8 @@ tasks.processResources {
 // distributable - shadowJar's output has to become the distributable directly here.
 tasks.shadowJar {
     configurations = listOf(shadowBundle)
-    archiveClassifier.set(if (fabricCandidate) "candidate-26.1-26.3" else "")
+    if (fabricCandidate) archiveFileName.set("chunkyidle-fabric-$modVersion-mc26.1.jar")
+    else archiveClassifier.set("")
     addMultiReleaseAttribute = false
 }
 
@@ -143,7 +144,7 @@ tasks.register<Copy>("candidateJar") {
     description = "Builds the Fabric 26.1–26.3 shared-jar candidate."
     onlyIf { fabricCandidate }
     from(tasks.shadowJar.flatMap { it.archiveFile })
-    into(rootProject.layout.buildDirectory.dir("candidates/fabric"))
+    into(rootProject.layout.buildDirectory.dir("candidates/fabric/26.1-26.3"))
     dependsOn(tasks.build)
 }
 
